@@ -18,7 +18,7 @@ const initPayment = async (req: Request & { user?: any }) => {
     });
 
     const booking = await prisma.booking.findUniqueOrThrow({
-        where: { id: req.body.bookingId },
+        where: { id: req.params.bookingId },
     });
 
     if (booking.touristId !== tourist.id) {
@@ -95,12 +95,22 @@ const paymentSuccess = async (tranId: string) => {
             },
         });
 
+        // await tx.booking.update({
+        //     where: { id: payment.bookingId },
+        //     data: {
+        //         isPaid: true,
+        //         paymentStatus: PaymentStatus.COMPLETED,
+        //         paidAt: new Date(),
+        //     },
+        // });
         await tx.booking.update({
             where: { id: payment.bookingId },
             data: {
                 isPaid: true,
                 paymentStatus: PaymentStatus.COMPLETED,
                 paidAt: new Date(),
+                guidePayoutAmount: Math.floor(payment.amount * 0.8), // example
+                isGuidePaid: false,
             },
         });
     });

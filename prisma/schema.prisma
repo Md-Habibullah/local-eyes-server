@@ -189,6 +189,9 @@ model Booking {
   paymentId     String? // reference from payment gateway
   paidAt        DateTime?
 
+  guidePayoutAmount Int?
+  isGuidePaid       Boolean @default(false)
+
   tourist Tourist @relation(fields: [touristId], references: [id])
   guide   Guide   @relation(fields: [guideId], references: [id])
   tour    Tour    @relation(fields: [tourId], references: [id])
