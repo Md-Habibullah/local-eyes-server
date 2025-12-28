@@ -1,8 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
 import auth from '../../middlewares/auth';
 import { UserRole } from '../../../generated/prisma/enums';
-import { TourController } from './tour.controller';
-import { TourValidation } from './tour.validation';
+import { TourController } from './listings.controller';
+import { TourValidation } from './listings.validation';
 import { fileUploader } from '../../../helpers/fileUploader';
 
 const router = express.Router();

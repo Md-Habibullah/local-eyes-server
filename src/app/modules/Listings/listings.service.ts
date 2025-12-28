@@ -7,7 +7,7 @@ import { paginationHelper } from '../../../helpers/paginationHelper';
 // import { IPaginationOptions } from '../../interface/pagination';
 import {
     tourSearchableFields,
-} from './tour.constant';
+} from './listings.constant';
 import {
     UserRole,
     UserStatus,
@@ -27,6 +27,14 @@ const createTour = async (req: Request & { user?: any }) => {
             },
         },
     });
+
+    //! will be added at leter
+    // if (!guide.isVerified) {
+    //     throw new ApiError(
+    //         httpStatus.FORBIDDEN,
+    //         'Please verify your guide profile first'
+    //     );
+    // }
 
     const file = req.file;
 
@@ -63,6 +71,14 @@ const updateTour = async (req: Request & { user?: any }) => {
             },
         },
     });
+
+    //! will be added at leter
+    // if (!guide.isVerified) {
+    //     throw new ApiError(
+    //         httpStatus.FORBIDDEN,
+    //         'Please verify your guide profile first'
+    //     );
+    // }
 
     if (existingTour.guideId !== guide.id) {
         throw new ApiError(

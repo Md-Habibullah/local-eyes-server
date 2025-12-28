@@ -4,7 +4,7 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { TourServices } from './tour.service';
 import pick from '../../../shared/pick';
-import { tourFilterableFields } from './tour.constant';
+import { tourFilterableFields } from './listings.constant';
 import { paginationFields } from '../../constrains';
 
 const createTour = catchAsync(
