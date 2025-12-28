@@ -72,7 +72,7 @@ model Tourist {
   userId String @unique
 
   name          String
-  gender        Gender
+  gender        Gender   @default(OTHER)
   profilePhoto  String?
   bio           String?
   address       String?

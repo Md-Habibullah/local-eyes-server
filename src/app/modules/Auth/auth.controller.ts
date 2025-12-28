@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import config from "../../../config";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
-import { IAuthUser } from "../../interfaces/common";
+import ApiError from "../../errors/apiError";
+import jwt from "jsonwebtoken"
 
 // register user
 const createUser = catchAsync(async (req: Request, res: Response) => {
@@ -183,7 +184,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 });
 
 const changePassword = catchAsync(
-    async (req: Request & { user?: IAuthUser }, res: Response) => {
+    async (req: Request, res: Response) => {
         const user = req.user;
 
         const result = await AuthServices.changePassword(user, req.body);
@@ -197,7 +198,7 @@ const changePassword = catchAsync(
     }
 );
 
-const forgotPassword = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
     await AuthServices.forgotPassword(req.body);
 
     sendResponse(res, {
@@ -208,7 +209,7 @@ const forgotPassword = catchAsync(async (req: Request & { user?: IAuthUser }, re
     });
 });
 
-const resetPassword = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
     // Extract token from Authorization header (remove "Bearer " prefix)
     const authHeader = req.headers.authorization;
     console.log({ authHeader });
@@ -225,7 +226,7 @@ const resetPassword = catchAsync(async (req: Request & { user?: IAuthUser }, res
     });
 });
 
-const getMe = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
+const getMe = catchAsync(async (req: Request, res: Response) => {
     const user = req.cookies as { accessToken: string; refreshToken: string };
 
     const result = await AuthServices.getMe(user);
@@ -238,6 +239,44 @@ const getMe = catchAsync(async (req: Request & { user?: IAuthUser }, res: Respon
     });
 });
 
+export const googleCallbackController = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const user = req.user
+        if (!user) {
+            throw new ApiError(httpStatus.NOT_FOUND, "No user found")
+        }
+
+        // 1️⃣ Handle redirect query
+        let redirectTo = req.query.state ? String(req.query.state) : ""
+        if (redirectTo.startsWith("/")) {
+            redirectTo = redirectTo.slice(1)
+        }
+
+        // 2️⃣ Create JWT token manually
+        const payload = {
+            email: user.email,
+            role: user.role,
+        }
+
+        if (!config.jwt.jwt_secret) throw new Error("JWT_SECRET is not defined in .env")
+
+        const token = jwt.sign(payload, config.jwt.jwt_secret, {
+            expiresIn: "7d",
+        })
+
+        // 3️⃣ Set cookie manually
+        res.cookie("auth_token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        })
+
+        // 4️⃣ Redirect to frontend
+        res.redirect(`${config.frontend_url}/${redirectTo}`)
+    }
+)
+
 
 export const AuthController = {
     createUser,
@@ -246,5 +285,6 @@ export const AuthController = {
     changePassword,
     forgotPassword,
     resetPassword,
-    getMe
+    getMe,
+    googleCallbackController
 };

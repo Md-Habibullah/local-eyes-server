@@ -11,22 +11,45 @@ passport.use(
         {
             clientID: config.google.google_client_id || "",
             clientSecret: config.google.google_client_secret || "",
-            callbackURL: config.google.google_callback_url
-        }, async (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) => {
+            callbackURL: config.google.google_callback_url,
+        },
+        async (accessToken, refreshToken, profile, done) => {
             try {
-                const email = profile.emails?.[0].value
-                if (!email) {
-                    return done(null, false, { message: 'no email found' })
+                // 🔥 1. CHECK GOOGLE PROVIDER FIRST
+                const auth = await prisma.authProviderModel.findUnique({
+                    where: {
+                        provider_providerId: {
+                            provider: "GOOGLE",
+                            providerId: profile.id,
+                        },
+                    },
+                })
+
+                if (auth) {
+                    const user = await prisma.user.findUnique({
+                        where: { id: auth.userId },
+                    })
+                    if (!user) return done(null, false)
+                    return done(null, user)
                 }
 
+                // 🔥 2. THEN CHECK EMAIL
+                const email = profile.emails?.[0]?.value
+                if (!email) {
+                    return done(null, false, { message: "no email found" })
+                }
+
+                // 🔥 3. CHECK USER BY EMAIL
                 let user = await prisma.user.findFirst({ where: { email } })
-                let tourist = {};
-                let data = { ...user, ...tourist };
-                const defaultPassword = await bcrypt.hashSync("default", config.salt_round)
 
                 if (!user) {
-                    await prisma.$transaction(async (tx) => {
-                        const user = await tx.user.create({
+                    const defaultPassword = await bcrypt.hash(
+                        "default",
+                        Number(config.salt_round)
+                    )
+
+                    user = await prisma.$transaction(async (tx) => {
+                        const createdUser = await tx.user.create({
                             data: {
                                 email,
                                 role: UserRole.TOURIST,
@@ -37,36 +60,48 @@ passport.use(
 
                         await tx.authProviderModel.create({
                             data: {
-                                provider: 'GOOGLE',
+                                provider: "GOOGLE",
                                 providerId: profile.id,
-                                userId: user.id,
+                                userId: createdUser.id,
                             },
                         })
 
-                        tourist = await tx.tourist.create({
+                        await tx.tourist.create({
                             data: {
-                                userId: user.id,
+                                userId: createdUser.id,
                                 name: profile.displayName,
-                                gender: 'MALE',
+                                gender: "OTHER",
                                 languages: [],
                                 preferences: [],
                             },
                         })
+
+                        return createdUser
+                    })
+                } else {
+                    // 🔥 4. EXISTING USER → LINK GOOGLE ACCOUNT
+                    await prisma.authProviderModel.create({
+                        data: {
+                            provider: "GOOGLE",
+                            providerId: profile.id,
+                            userId: user.id,
+                        },
                     })
                 }
-                return done(null, data)
 
+                return done(null, user)
             } catch (error) {
-                // eslint-disable-next-line no-console
-                console.log('google stratigy error', error)
+                console.error("google strategy error", error)
                 return done(error)
             }
         }
     )
 )
 
-passport.serializeUser((user: any, done: (err: any, id?: unknown) => void) => {
-    done(null, user._id)
+
+
+passport.serializeUser((user: any, done) => {
+    done(null, user.id)
 })
 
 passport.deserializeUser(async (id: string, done: any) => {

@@ -1,6 +1,9 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Application, NextFunction, Request, Response } from 'express';
+import passport from 'passport';
+import './config/passport';
+import expressSession from 'express-session';
 import httpStatus from 'http-status';
 // import cron from 'node-cron';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
@@ -9,6 +12,13 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import router from './app/routes';
 
 const app: Application = express();
+app.use(expressSession({
+    secret: 'express_session_secret',
+    resave: false,
+    saveUninitialized: false
+}))
+app.use(passport.initialize())
+app.use(passport.session())
 app.use(cookieParser());
 
 // app.post(

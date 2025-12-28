@@ -9,6 +9,8 @@ export default {
 
     database_url: process.env.DATABASE_URL,
 
+    express_session_secret: process.env.EXPRESS_SESSION_SECRET,
+
     salt_round: process.env.SALT_ROUND,
 
     jwt: {
