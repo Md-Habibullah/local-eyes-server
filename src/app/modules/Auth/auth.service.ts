@@ -359,7 +359,7 @@ const resetPassword = async (token: string | null, payload: { email?: string, pa
     })
 };
 
-const getMe = async (user: any) => {
+const getMe = async (user: { accessToken: string; refreshToken: string }) => {
     const accessToken = user?.accessToken;
     const decodedData = jwtHelpers.verifyToken(accessToken, config.jwt.jwt_secret as Secret);
 

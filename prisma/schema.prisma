@@ -85,6 +85,11 @@ model Guide {
   expertise     String[]
   dailyRate     Int
 
+  isVerified Boolean @default(false)
+
+  otp          String?
+  otpExpiresAt DateTime?
+
   user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())

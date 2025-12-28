@@ -67,6 +67,7 @@ router.post(
 
 router.get(
     '/me',
+    auth(UserRole.ADMIN, UserRole.GUIDE, UserRole.TOURIST),
     AuthController.getMe
 );
 

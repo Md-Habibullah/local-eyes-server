@@ -136,9 +136,23 @@ const getMyProfile = async (user: IAuthUser) => {
                 languages: true,
                 expertise: true,
                 dailyRate: true,
+                isVerified: true,
 
                 createdAt: true,
-                updatedAt: true
+                updatedAt: true,
+
+                reviews: {
+                    select: {
+                        rating: true,
+                        comment: true,
+                        createdAt: true,
+                        tourist: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
             },
         });
     } else if (userInfo.role === UserRole.TOURIST) {
@@ -162,7 +176,18 @@ const getMyProfile = async (user: IAuthUser) => {
         });
     }
 
-    return { ...userInfo, ...profileInfo };
+    const avgRating = await prisma.review.aggregate({
+        where: { guideId: profileInfo?.id },
+        _avg: { rating: true },
+        _count: { rating: true },
+    });
+
+    return {
+        ...userInfo,
+        ...profileInfo,
+        averageRating: avgRating._avg.rating ?? 0,
+        totalReviews: avgRating._count.rating,
+    };
 };
 
 // get user by id (admin)

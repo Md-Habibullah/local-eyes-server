@@ -75,13 +75,13 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     const result = await AuthServices.loginUser(req.body);
     const { refreshToken, accessToken } = result;
     res.cookie("accessToken", accessToken, {
-        secure: true,
+        secure: config.env === 'production',
         httpOnly: true,
         sameSite: "none",
         maxAge: accessTokenMaxAge,
     });
     res.cookie("refreshToken", refreshToken, {
-        secure: true,
+        secure: config.env === 'production',
         httpOnly: true,
         sameSite: "none",
         maxAge: refreshTokenMaxAge,
@@ -160,14 +160,14 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 
     const result = await AuthServices.refreshToken(refreshToken);
     res.cookie("accessToken", result.accessToken, {
-        secure: true,
+        secure: config.env === 'production',
         httpOnly: true,
         sameSite: "none",
         maxAge: accessTokenMaxAge,
     });
 
     res.cookie("refreshToken", result.refreshToken, {
-        secure: true,
+        secure: config.env === 'production',
         httpOnly: true,
         sameSite: "none",
         maxAge: refreshTokenMaxAge,
@@ -227,7 +227,7 @@ const resetPassword = catchAsync(async (req: Request & { user?: IAuthUser }, res
 });
 
 const getMe = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
-    const user = req.cookies;
+    const user = req.cookies as { accessToken: string; refreshToken: string };
 
     const result = await AuthServices.getMe(user);
 
@@ -238,7 +238,6 @@ const getMe = catchAsync(async (req: Request & { user?: IAuthUser }, res: Respon
         data: result,
     });
 });
-
 
 
 export const AuthController = {

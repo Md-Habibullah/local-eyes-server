@@ -109,7 +109,7 @@ const paymentSuccess = async (tranId: string) => {
                 isPaid: true,
                 paymentStatus: PaymentStatus.COMPLETED,
                 paidAt: new Date(),
-                guidePayoutAmount: Math.floor(payment.amount * 0.8), // example
+                guidePayoutAmount: Math.floor(payment.amount * 0.8),
                 isGuidePaid: false,
             },
         });
