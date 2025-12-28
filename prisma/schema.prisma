@@ -29,9 +29,10 @@ enum AuthProvider {
   GOOGLE
   FACEBOOK
   GITHUB
+  CREDENTIALS
 }
 
-model Auth {
+model AuthProviderModel {
   id         String       @id @default(uuid())
   provider   AuthProvider
   providerId String
@@ -53,7 +54,7 @@ model User {
   needPasswordChange Boolean    @default(true)
   status             UserStatus @default(ACTIVE)
 
-  auths Auth[]
+  auths AuthProviderModel[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -77,7 +78,7 @@ model Tourist {
   address       String?
   contactNumber String?
   languages     String[]
-  preferences   String?
+  preferences   String[]
 
   user User @relation(fields: [userId], references: [id])
 

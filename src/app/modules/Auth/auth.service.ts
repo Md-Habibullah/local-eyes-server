@@ -10,6 +10,7 @@ import { UserRole, UserStatus } from '../../../generated/prisma/enums';
 import { prisma } from '../../../lib/prisma';
 import { fileUploader } from '../../../helpers/fileUploader';
 import { Request } from 'express';
+import { email } from 'zod';
 
 
 // create user (register)
@@ -44,6 +45,14 @@ const createUser = async (req: Request) => {
                 needPasswordChange: false,
             },
         });
+
+        await tx.authProviderModel.create({
+            data: {
+                provider: 'CREDENTIALS',
+                providerId: req.body.user.email,
+                userId: user.id
+            }
+        })
 
         if (req.body.user.role === UserRole.TOURIST) {
             await tx.tourist.create({

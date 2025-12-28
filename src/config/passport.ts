@@ -20,42 +20,41 @@ passport.use(
                 }
 
                 let user = await prisma.user.findFirst({ where: { email } })
+                let tourist = {};
+                let data = { ...user, ...tourist };
                 const defaultPassword = await bcrypt.hashSync("default", config.salt_round)
+
                 if (!user) {
-                    // user = await User.create({
-                    //     email,
-                    //     name: profile.displayName,
-                    //     profilePhoto: profile.photos?.[0].value,
-                    //     role: UserRole.TOURIST,
-                    //     isVerified: true,
-                    //     auths: [{
-                    //         provider: 'google',
-                    //         providerId: profile.id
-                    //     }]
-                    // })
+                    await prisma.$transaction(async (tx) => {
+                        const user = await tx.user.create({
+                            data: {
+                                email,
+                                role: UserRole.TOURIST,
+                                password: defaultPassword,
+                                needPasswordChange: true,
+                            },
+                        })
 
-                    user = await prisma.user.create({
-                        data: {
-                            email,
-                            role: UserRole.TOURIST,
-                            password: defaultPassword,
-                            isVerified: true,
-                            auths: [{
-                                provider: 'google',
-                                providerId: profile.id
-                            }]
-                        }
+                        await tx.authProviderModel.create({
+                            data: {
+                                provider: 'GOOGLE',
+                                providerId: profile.id,
+                                userId: user.id,
+                            },
+                        })
+
+                        tourist = await tx.tourist.create({
+                            data: {
+                                userId: user.id,
+                                name: profile.displayName,
+                                gender: 'MALE',
+                                languages: [],
+                                preferences: [],
+                            },
+                        })
                     })
-
-                    const tourist = await prisma.tourist.create({
-                        data: {
-                            name: profile.displayName,
-                            profilePhoto: profile.photos?.[0].value,
-                        }
-                    })
-
                 }
-                return done(null, user)
+                return done(null, data)
 
             } catch (error) {
                 // eslint-disable-next-line no-console
@@ -72,7 +71,7 @@ passport.serializeUser((user: any, done: (err: any, id?: unknown) => void) => {
 
 passport.deserializeUser(async (id: string, done: any) => {
     try {
-        const user = await User.findById(id)
+        const user = await prisma.user.findUnique({ where: { id } })
         done(null, user)
     } catch (error) {
         done(error)
