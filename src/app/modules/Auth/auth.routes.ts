@@ -5,7 +5,7 @@ import { authLimiter } from '../../middlewares/rateLimiter';
 import { AuthController } from './auth.controller';
 import { UserRole } from '../../../generated/prisma/enums';
 import { fileUploader } from '../../../helpers/fileUploader';
-import { UserValidation } from '../User/user.validation';
+import { UserValidation } from '../Users/user.validation';
 
 const router = express.Router();
 

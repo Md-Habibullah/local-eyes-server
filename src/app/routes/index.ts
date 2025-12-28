@@ -1,11 +1,11 @@
 import express from 'express';
 import { apiLimiter } from '../middlewares/rateLimiter';
 import { AuthRoutes } from '../modules/Auth/auth.routes';
-import { UserRoutes } from '../modules/User/user.routes';
+import { UserRoutes } from '../modules/Users/user.routes';
 import { TourRoutes } from '../modules/Listings/listings.route';
-import { PaymentRoutes } from '../modules/Payment/payment.route';
-import { BookingRoutes } from '../modules/Booking/booking.route';
-import { ReviewRoutes } from '../modules/Review/review.routes';
+import { PaymentRoutes } from '../modules/Payments/payment.route';
+import { BookingRoutes } from '../modules/Bookings/booking.route';
+import { ReviewRoutes } from '../modules/Reviews/review.routes';
 
 const router = express.Router();
 

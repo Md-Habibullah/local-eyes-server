@@ -6,7 +6,6 @@ import sendResponse from "../../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
 import { IAuthUser } from "../../interfaces/common";
 
-
 // register user
 const createUser = catchAsync(async (req: Request, res: Response) => {
     const result = await AuthServices.createUser(req);
@@ -198,7 +197,7 @@ const changePassword = catchAsync(
     }
 );
 
-const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+const forgotPassword = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
     await AuthServices.forgotPassword(req.body);
 
     sendResponse(res, {
