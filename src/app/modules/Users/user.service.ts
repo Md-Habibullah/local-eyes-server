@@ -7,11 +7,11 @@ import { UserRole, UserStatus } from '../../../generated/prisma/enums';
 import { userSearchableFields } from './user.constant';
 import { paginationHelper } from '../../../helpers/paginationHelper';
 import { IPaginationOptions } from '../../interfaces/pagination';
-import { IAuthUser } from '../../interfaces/IAuthUser';
 import { get } from 'http';
 import { Guide, Tourist } from '../../../generated/prisma/client';
 import { fileUploader } from '../../../helpers/fileUploader';
 import { Request } from 'express';
+import { JwtPayload } from '../../interfaces/jwt.interface';
 
 
 // get all users (admin)
@@ -87,7 +87,7 @@ const getAllUsers = async (
 
 // get my profile (me)
 
-const getMyProfile = async (user: IAuthUser) => {
+const getMyProfile = async (user: JwtPayload) => {
     const userInfo = await prisma.user.findFirstOrThrow({
         where: {
             email: user?.email,
@@ -245,7 +245,7 @@ const getUserByIdAdminOnly = async (id: string) => {
 };
 
 // update profile (me)
-const updateProfile = async (user: IAuthUser, id: string, req: Request) => {
+const updateProfile = async (user: JwtPayload, id: string, req: Request) => {
     const payload = { ...req.body };
     const userData = await prisma.user.findFirst({
         where: {

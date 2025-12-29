@@ -11,6 +11,7 @@ import { prisma } from '../../../lib/prisma';
 import { fileUploader } from '../../../helpers/fileUploader';
 import { Request } from 'express';
 import { email } from 'zod';
+import { JwtPayload } from '../../interfaces/jwt.interface';
 
 
 // create user (register)
@@ -112,12 +113,16 @@ const loginUser = async (payload: {
     email: string,
     password: string
 }) => {
-    const userData = await prisma.user.findFirstOrThrow({
+    const userData = await prisma.user.findFirst({
         where: {
             email: payload.email,
             status: UserStatus.ACTIVE
         }
     });
+
+    if (!userData) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, "User does not exists!");
+    }
 
     const isCorrectPassword: boolean = await bcrypt.compare(payload.password, userData.password);
 
@@ -192,7 +197,7 @@ const refreshToken = async (token: string) => {
 
 };
 
-const changePassword = async (user: any, payload: any) => {
+const changePassword = async (user: JwtPayload, payload: any) => {
     const userData = await prisma.user.findUniqueOrThrow({
         where: {
             email: user.email,

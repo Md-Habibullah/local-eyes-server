@@ -6,6 +6,7 @@ import pick from '../../../shared/pick';
 import { bookingFilterableFields } from './booking.constant';
 import { BookingServices } from './booking.service';
 import { paginationFields } from '../../constrains';
+import { JwtPayload } from '../../interfaces/jwt.interface';
 
 const createBooking = catchAsync(
     async (req: Request, res: Response) => {
@@ -26,7 +27,7 @@ const getAllBookings = catchAsync(
         const paginationOptions = pick(req.query, paginationFields);
 
         const result = await BookingServices.getAllBookings(
-            req.user,
+            req.user as JwtPayload,
             filters,
             paginationOptions
         );

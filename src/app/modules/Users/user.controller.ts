@@ -6,14 +6,14 @@ import pick from '../../../shared/pick';
 import { UserServices } from './user.service';
 import { userFilterableFields } from './user.constant';
 import { paginationFields } from '../../constrains';
-import { IAuthUser } from '../../interfaces/IAuthUser';
+import { JwtPayload } from '../../interfaces/jwt.interface';
 
 
-const getMyProfile = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
+const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 
     const user = req.user;
 
-    const result = await UserServices.getMyProfile(user as IAuthUser);
+    const result = await UserServices.getMyProfile(user as JwtPayload);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -74,11 +74,11 @@ const getUserByIdAdminOnly = catchAsync(async (req: Request, res: Response) => {
 
 // update profile (me)
 const updateProfile = catchAsync(
-    async (req: Request & { user?: IAuthUser }, res: Response) => {
+    async (req: Request, res: Response) => {
         const user = req.user;
         const { id } = req.params;
 
-        const result = await UserServices.updateProfile(user as IAuthUser, id, req);
+        const result = await UserServices.updateProfile(user as JwtPayload, id, req);
 
         sendResponse(res, {
             statusCode: httpStatus.OK,

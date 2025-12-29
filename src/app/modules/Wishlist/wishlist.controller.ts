@@ -4,13 +4,14 @@ import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import httpStatus from "http-status";
 import { WishlistServices } from "./wishlist.service";
+import { JwtPayload } from "../../interfaces/jwt.interface";
 
 const addToWishlist = catchAsync(
     async (req: Request, res: Response) => {
-        const touristId = req.user?.tourist?.id || '';
+        const user = req.user as JwtPayload;
         const { tourId } = req.body;
 
-        const result = await WishlistServices.addToWishlist(touristId, tourId);
+        const result = await WishlistServices.addToWishlist(user, tourId);
 
         sendResponse(res, {
             statusCode: httpStatus.CREATED,
@@ -23,10 +24,10 @@ const addToWishlist = catchAsync(
 
 const removeFromWishlist = catchAsync(
     async (req: Request, res: Response) => {
-        const touristId = req.user?.tourist?.id || '';
+        const user = req.user as JwtPayload;
         const { tourId } = req.params;
 
-        await WishlistServices.removeFromWishlist(touristId, tourId);
+        await WishlistServices.removeFromWishlist(user, tourId);
 
         sendResponse(res, {
             statusCode: httpStatus.OK,
@@ -39,9 +40,9 @@ const removeFromWishlist = catchAsync(
 
 const getMyWishlist = catchAsync(
     async (req: Request, res: Response) => {
-        const touristId = req.user?.tourist?.id || '';
+        const user = req.user as JwtPayload;
 
-        const result = await WishlistServices.getMyWishlist(touristId);
+        const result = await WishlistServices.getMyWishlist(user);
 
         sendResponse(res, {
             statusCode: httpStatus.OK,

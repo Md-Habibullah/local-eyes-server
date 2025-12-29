@@ -7,6 +7,7 @@ import { AuthServices } from "./auth.service";
 import ApiError from "../../errors/apiError";
 import jwt, { Secret } from "jsonwebtoken"
 import { jwtHelpers } from "../../../helpers/jwtHelpers";
+import { JwtPayload } from "../../interfaces/jwt.interface";
 
 // register user
 const createUser = catchAsync(async (req: Request, res: Response) => {
@@ -186,7 +187,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 
 const changePassword = catchAsync(
     async (req: Request, res: Response) => {
-        const user = req.user;
+        const user = req.user as JwtPayload;
 
         const result = await AuthServices.changePassword(user, req.body);
 
@@ -215,7 +216,7 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
     const authHeader = req.headers.authorization;
     console.log({ authHeader });
     const token = authHeader ? authHeader.replace('Bearer ', '') : null;
-    const user = req.user || undefined; // Will be populated if authenticated via middleware
+    const user = req.user as JwtPayload;
 
     await AuthServices.resetPassword(token, req.body, user);
 
@@ -242,7 +243,7 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
 
 export const googleCallbackController = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
-        const user = req.user
+        const user = req.user as JwtPayload;
         if (!user) {
             throw new ApiError(httpStatus.NOT_FOUND, "No user found")
         }
@@ -254,10 +255,10 @@ export const googleCallbackController = catchAsync(
         }
 
         // 2️⃣ Create JWT token manually
-        const payload = {
+        const payload: JwtPayload = {
             userId: user.userId,
             email: user.email,
-            role: user.role,
+            role: user.role
         }
 
         const accessToken = jwtHelpers.generateToken(

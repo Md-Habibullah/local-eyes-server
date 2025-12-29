@@ -2,7 +2,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
 import config from ".";
-import { UserRole, UserStatus } from "../generated/prisma/enums";
+import { AuthProvider, UserRole, UserStatus } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -26,7 +26,7 @@ passport.use(
                 const authProvider = await prisma.authProviderModel.findUnique({
                     where: {
                         provider_providerId: {
-                            provider: "GOOGLE",
+                            provider: AuthProvider.GOOGLE,
                             providerId: profile.id,
                         },
                     },

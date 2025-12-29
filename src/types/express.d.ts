@@ -1,8 +1,7 @@
-import { IAuthUser } from "../app/interfaces/IAuthUser";
-
+import { JwtPayload } from "../app/interfaces/jwt.interface";
 
 declare global {
     namespace Express {
-        interface User extends IAuthUser { }
+        interface User extends JwtPayload { }
     }
 }

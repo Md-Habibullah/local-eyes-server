@@ -5,6 +5,7 @@ import { prisma } from '../../../lib/prisma';
 import { BookingStatus, UserRole } from '../../../generated/prisma/enums';
 import { paginationHelper } from '../../../helpers/paginationHelper';
 import { IPaginationOptions } from '../../interfaces/pagination';
+import { JwtPayload } from '../../interfaces/jwt.interface';
 
 // ===============================
 // CREATE BOOKING (TOURIST)
@@ -38,7 +39,7 @@ const createBooking = async (req: Request) => {
 // GET ALL BOOKINGS (ROLE BASED)
 // ===============================
 const getAllBookings = async (
-    user: any,
+    user: JwtPayload,
     filters: any,
     paginationOptions: IPaginationOptions
 ) => {

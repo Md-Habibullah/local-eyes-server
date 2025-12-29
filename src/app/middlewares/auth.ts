@@ -5,52 +5,50 @@ import config from "../../config";
 import { jwtHelpers } from "../../helpers/jwtHelpers";
 import ApiError from "../errors/apiError";
 import { prisma } from "../../lib/prisma";
-import { IAuthUser } from "../interfaces/IAuthUser";
+import { JwtPayload } from "../interfaces/jwt.interface";
+import { UserRole, UserStatus } from "../../generated/prisma/enums";
 
-const auth = (...roles: string[]) => {
+const auth = (...roles: UserRole[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let token = req.headers.authorization || req.cookies?.accessToken;
+            let token: string | undefined;
+
+            // 1️⃣ Header first, then cookie
+            if (req.headers.authorization?.startsWith("Bearer ")) {
+                token = req.headers.authorization.split(" ")[1];
+            } else if (req.cookies?.accessToken) {
+                token = req.cookies.accessToken;
+            }
 
             if (!token) {
                 throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!");
             }
 
-            if (token.startsWith("Bearer ")) {
-                token = token.split(" ")[1];
-            }
-
+            // 2️⃣ Verify token
             const verifiedUser = jwtHelpers.verifyToken(
                 token,
                 config.jwt.jwt_secret as Secret
-            ) as IAuthUser;
+            ) as JwtPayload;
 
-            let profile = null;
+            // 4️⃣ Optional DB check (recommended)
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: verifiedUser.userId,
+                    status: UserStatus.ACTIVE
+                },
+                select: { status: true },
+            });
 
-            if (verifiedUser.role === "TOURIST") {
-                profile = await prisma.tourist.findUnique({
-                    where: { userId: verifiedUser.userId },
-                    select: { id: true },
-                });
+            if (!user || user.status !== UserStatus.ACTIVE) {
+                throw new ApiError(httpStatus.UNAUTHORIZED, "User not authorized");
             }
 
-            if (verifiedUser.role === "GUIDE") {
-                profile = await prisma.guide.findUnique({
-                    where: { userId: verifiedUser.userId },
-                    select: { id: true, isVerified: true },
-                });
-            }
-
-            req.user = {
-                ...verifiedUser,
-                tourist: verifiedUser.role === "TOURIST" ? profile : null,
-                guide: verifiedUser.role === "GUIDE" ? profile : null
-            };
-
-            if (roles.length && !roles.includes(req.user.role)) {
+            // 5️⃣ Role check
+            if (roles.length && !roles.includes(verifiedUser.role)) {
                 throw new ApiError(httpStatus.FORBIDDEN, "Forbidden!");
             }
 
+            req.user = verifiedUser;
             next();
         } catch (err) {
             next(err);
