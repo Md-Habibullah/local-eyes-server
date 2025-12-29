@@ -89,9 +89,7 @@ const getAllBookings = async (
 // ===============================
 // UPDATE BOOKING STATUS (GUIDE)
 // ===============================
-const updateBookingStatus = async (
-    req: Request & { user?: any }
-) => {
+const updateBookingStatus = async (req: Request & { user?: any }) => {
     const { id } = req.params;
 
     const booking = await prisma.booking.findUniqueOrThrow({
@@ -102,15 +100,39 @@ const updateBookingStatus = async (
         where: { user: { email: req.user.email } },
     });
 
+    // ownership check
     if (booking.guideId !== guide.id) {
         throw new ApiError(httpStatus.FORBIDDEN, 'Not allowed');
     }
 
+    // 🔐 BOOKING WORKFLOW VALIDATION (ADD HERE 👇)
+
+    // completed booking cannot be changed
+    if (booking.status === BookingStatus.COMPLETED) {
+        throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            'Completed booking cannot be changed'
+        );
+    }
+
+    // cannot complete without confirming
+    if (
+        booking.status === BookingStatus.PENDING &&
+        req.body.status === BookingStatus.COMPLETED
+    ) {
+        throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            'Confirm booking before completing'
+        );
+    }
+
+    // ✅ safe to update now
     return prisma.booking.update({
         where: { id },
         data: { status: req.body.status },
     });
 };
+
 
 export const BookingServices = {
     createBooking,

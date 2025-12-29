@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from "passport";
-import { Strategy as GoogleStrategy, Profile, VerifyCallback } from "passport-google-oauth20";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import config from ".";
-import { UserRole } from "../generated/prisma/enums";
+import { UserRole, UserStatus } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 passport.use(
     new GoogleStrategy(
@@ -13,9 +14,9 @@ passport.use(
             clientSecret: config.google.google_client_secret || "",
             callbackURL: config.google.google_callback_url,
         },
-        async (accessToken, refreshToken, profile, done) => {
+        async (_accessToken, _refreshToken, profile, done) => {
             try {
-                // 🔥 1. CHECK GOOGLE PROVIDER FIRST
+                // 1️⃣ check provider
                 const auth = await prisma.authProviderModel.findUnique({
                     where: {
                         provider_providerId: {
@@ -23,30 +24,29 @@ passport.use(
                             providerId: profile.id,
                         },
                     },
-                })
+                });
 
                 if (auth) {
                     const user = await prisma.user.findUnique({
                         where: { id: auth.userId },
-                    })
-                    if (!user) return done(null, false)
-                    return done(null, user)
+                    });
+                    if (!user || user.status !== UserStatus.ACTIVE)
+                        return done(null, false);
+                    return done(null, user);
                 }
 
-                // 🔥 2. THEN CHECK EMAIL
-                const email = profile.emails?.[0]?.value
-                if (!email) {
-                    return done(null, false, { message: "no email found" })
-                }
+                // 2️⃣ email
+                const email = profile.emails?.[0]?.value;
+                if (!email) return done(null, false);
 
-                // 🔥 3. CHECK USER BY EMAIL
-                let user = await prisma.user.findFirst({ where: { email } })
+                // 3️⃣ find user
+                let user = await prisma.user.findFirst({ where: { email } });
 
                 if (!user) {
                     const defaultPassword = await bcrypt.hash(
-                        "default",
+                        crypto.randomUUID(),
                         Number(config.salt_round)
-                    )
+                    );
 
                     user = await prisma.$transaction(async (tx) => {
                         const createdUser = await tx.user.create({
@@ -56,15 +56,22 @@ passport.use(
                                 password: defaultPassword,
                                 needPasswordChange: true,
                             },
-                        })
+                        });
 
-                        await tx.authProviderModel.create({
-                            data: {
+                        await tx.authProviderModel.upsert({
+                            where: {
+                                provider_providerId: {
+                                    provider: "GOOGLE",
+                                    providerId: profile.id,
+                                },
+                            },
+                            update: {},
+                            create: {
                                 provider: "GOOGLE",
                                 providerId: profile.id,
                                 userId: createdUser.id,
                             },
-                        })
+                        });
 
                         await tx.tourist.create({
                             data: {
@@ -74,29 +81,38 @@ passport.use(
                                 languages: [],
                                 preferences: [],
                             },
-                        })
+                        });
 
-                        return createdUser
-                    })
+                        return createdUser;
+                    });
                 } else {
-                    // 🔥 4. EXISTING USER → LINK GOOGLE ACCOUNT
-                    await prisma.authProviderModel.create({
-                        data: {
+                    await prisma.authProviderModel.upsert({
+                        where: {
+                            provider_providerId: {
+                                provider: "GOOGLE",
+                                providerId: profile.id,
+                            },
+                        },
+                        update: {},
+                        create: {
                             provider: "GOOGLE",
                             providerId: profile.id,
                             userId: user.id,
                         },
-                    })
+                    });
                 }
 
-                return done(null, user)
+                if (user.status !== UserStatus.ACTIVE)
+                    return done(null, false);
+
+                return done(null, user);
             } catch (error) {
-                console.error("google strategy error", error)
-                return done(error)
+                console.error("google strategy error", error);
+                return done(error);
             }
         }
     )
-)
+);
 
 
 

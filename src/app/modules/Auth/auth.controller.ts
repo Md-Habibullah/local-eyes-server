@@ -5,7 +5,8 @@ import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
 import ApiError from "../../errors/apiError";
-import jwt from "jsonwebtoken"
+import jwt, { Secret } from "jsonwebtoken"
+import { jwtHelpers } from "../../../helpers/jwtHelpers";
 
 // register user
 const createUser = catchAsync(async (req: Request, res: Response) => {
@@ -258,19 +259,30 @@ export const googleCallbackController = catchAsync(
             role: user.role,
         }
 
-        if (!config.jwt.jwt_secret) throw new Error("JWT_SECRET is not defined in .env")
+        const accessToken = jwtHelpers.generateToken(
+            payload,
+            config.jwt.jwt_secret as Secret,
+            config.jwt.expires_in as string
+        )
 
-        const token = jwt.sign(payload, config.jwt.jwt_secret, {
-            expiresIn: "7d",
-        })
+        const refreshToken = jwtHelpers.generateToken(
+            payload,
+            config.jwt.refresh_token_secret as Secret,
+            config.jwt.refresh_token_expires_in as string
+        )
 
-        // 3️⃣ Set cookie manually
-        res.cookie("auth_token", token, {
+        res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            secure: config.env === "production",
+            sameSite: "none",
         })
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: config.env === "production",
+            sameSite: "none",
+        })
+
 
         // 4️⃣ Redirect to frontend
         res.redirect(`${config.frontend_url}/${redirectTo}`)

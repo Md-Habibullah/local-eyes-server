@@ -84,9 +84,15 @@ const initPayment = async (req: Request & { user?: any }) => {
 // ===============================
 const paymentSuccess = async (tranId: string) => {
     return prisma.$transaction(async (tx) => {
+
         const payment = await tx.payment.findFirstOrThrow({
             where: { transactionId: tranId },
         });
+
+        // 🔐 IDMPOTENCY GUARD (ADD THIS)
+        if (payment.status === PaymentStatus.COMPLETED) {
+            return; // already processed, do nothing
+        }
 
         await tx.payment.update({
             where: { id: payment.id },
@@ -95,14 +101,6 @@ const paymentSuccess = async (tranId: string) => {
             },
         });
 
-        // await tx.booking.update({
-        //     where: { id: payment.bookingId },
-        //     data: {
-        //         isPaid: true,
-        //         paymentStatus: PaymentStatus.COMPLETED,
-        //         paidAt: new Date(),
-        //     },
-        // });
         await tx.booking.update({
             where: { id: payment.bookingId },
             data: {
@@ -115,6 +113,7 @@ const paymentSuccess = async (tranId: string) => {
         });
     });
 };
+
 
 export const PaymentServices = {
     initPayment,
