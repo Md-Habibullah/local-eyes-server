@@ -11,9 +11,7 @@ import { IPaginationOptions } from '../../interfaces/pagination';
 // ===============================
 const createBooking = async (req: Request) => {
     const tourist = await prisma.tourist.findFirstOrThrow({
-        where: {
-            user: { email: req.user?.email },
-        },
+        where: { userId: req.user!.userId },
     });
 
     const tour = await prisma.tour.findUniqueOrThrow({
@@ -97,7 +95,7 @@ const updateBookingStatus = async (req: Request) => {
     });
 
     const guide = await prisma.guide.findFirstOrThrow({
-        where: { user: { email: req.user?.email } },
+        where: { userId: req.user!.userId },
     });
 
     // ownership check

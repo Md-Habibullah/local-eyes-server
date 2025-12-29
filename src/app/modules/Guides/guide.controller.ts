@@ -6,8 +6,8 @@ import httpStatus from 'http-status';
 import { GuideServices } from './guide.service';
 
 const sendOtp = catchAsync(async (req: Request, res: Response) => {
-    const email = req.user?.email || ""
-    await GuideServices.sendVerificationOtp(email);
+    const userId = req.user!.userId;
+    await GuideServices.sendVerificationOtp(userId);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -19,9 +19,9 @@ const sendOtp = catchAsync(async (req: Request, res: Response) => {
 
 const verifyOtp = catchAsync(async (req: Request, res: Response) => {
     const { otp } = req.body;
-    const email = req.user?.email || ""
+    const userId = req.user!.userId;
 
-    await GuideServices.verifyGuideOtp(email, otp);
+    await GuideServices.verifyGuideOtp(userId, otp);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -34,8 +34,8 @@ const verifyOtp = catchAsync(async (req: Request, res: Response) => {
 // src/app/modules/guide/guide.controller.ts
 
 const resendOtp = catchAsync(async (req: Request, res: Response) => {
-    const email = req.user?.email || ""
-    await GuideServices.resendVerificationOtp(email);
+    const userId = req.user!.userId;
+    await GuideServices.resendVerificationOtp(userId);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

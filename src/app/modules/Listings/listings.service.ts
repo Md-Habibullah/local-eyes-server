@@ -18,14 +18,17 @@ import { IPaginationOptions } from '../../interfaces/pagination';
 // CREATE TOUR
 // ===============================
 const createTour = async (req: Request) => {
+    // const guide = await prisma.guide.findFirstOrThrow({
+    //     where: {
+    //         user: {
+    //             email: req.user?.email,
+    //             role: UserRole.GUIDE,
+    //             status: UserStatus.ACTIVE,
+    //         },
+    //     },
+    // });
     const guide = await prisma.guide.findFirstOrThrow({
-        where: {
-            user: {
-                email: req.user?.email,
-                role: UserRole.GUIDE,
-                status: UserStatus.ACTIVE,
-            },
-        },
+        where: { userId: req.user!.userId },
     });
 
     //! will be added at leter
@@ -63,13 +66,16 @@ const updateTour = async (req: Request) => {
         where: { id },
     });
 
+    // const guide = await prisma.guide.findFirstOrThrow({
+    //     where: {
+    //         user: {
+    //             email: req.user?.email,
+    //             role: UserRole.GUIDE,
+    //         },
+    //     },
+    // });
     const guide = await prisma.guide.findFirstOrThrow({
-        where: {
-            user: {
-                email: req.user?.email,
-                role: UserRole.GUIDE,
-            },
-        },
+        where: { userId: req.user!.userId },
     });
 
     //! will be added at leter
@@ -248,12 +254,15 @@ const deleteTour = async (req: Request) => {
         where: { id },
     });
 
+    // const guide = await prisma.guide.findFirstOrThrow({
+    //     where: {
+    //         user: {
+    //             email: req.user?.email,
+    //         },
+    //     },
+    // });
     const guide = await prisma.guide.findFirstOrThrow({
-        where: {
-            user: {
-                email: req.user?.email,
-            },
-        },
+        where: { userId: req.user!.userId },
     });
 
     if (tour.guideId !== guide.id) {
