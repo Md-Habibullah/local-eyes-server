@@ -5,18 +5,17 @@ import config from "../../config";
 import { jwtHelpers } from "../../helpers/jwtHelpers";
 import ApiError from "../errors/apiError";
 import { prisma } from "../../lib/prisma";
-
+import { IAuthUser } from "../interfaces/common";
 
 const auth = (...roles: string[]) => {
-    return async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let token = req.headers.authorization || req.cookies.accessToken;
+            let token = req.headers.authorization || req.cookies?.accessToken;
 
             if (!token) {
                 throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!");
             }
 
-            // handle Bearer token
             if (token.startsWith("Bearer ")) {
                 token = token.split(" ")[1];
             }
@@ -24,28 +23,21 @@ const auth = (...roles: string[]) => {
             const verifiedUser = jwtHelpers.verifyToken(
                 token,
                 config.jwt.jwt_secret as Secret
-            );
+            ) as IAuthUser;
 
             let profile = null;
 
             if (verifiedUser.role === "TOURIST") {
                 profile = await prisma.tourist.findUnique({
                     where: { userId: verifiedUser.userId },
-                    select: { id: true }
+                    select: { id: true },
                 });
             }
 
             if (verifiedUser.role === "GUIDE") {
                 profile = await prisma.guide.findUnique({
                     where: { userId: verifiedUser.userId },
-                    select: { id: true, isVerified: true }
-                });
-            }
-
-            if (verifiedUser.role === "ADMIN") {
-                profile = await prisma.admin.findUnique({
-                    where: { userId: verifiedUser.userId },
-                    select: { id: true }
+                    select: { id: true, isVerified: true },
                 });
             }
 
@@ -53,12 +45,10 @@ const auth = (...roles: string[]) => {
                 ...verifiedUser,
                 tourist: verifiedUser.role === "TOURIST" ? profile : null,
                 guide: verifiedUser.role === "GUIDE" ? profile : null,
-                admin: verifiedUser.role === "ADMIN" ? profile : null,
+                admin: verifiedUser.role === "ADMIN" ? null : null,
             };
 
-            req.user = verifiedUser;
-
-            if (roles.length && !roles.includes(verifiedUser.role)) {
+            if (roles.length && !roles.includes(req.user.role)) {
                 throw new ApiError(httpStatus.FORBIDDEN, "Forbidden!");
             }
 
@@ -68,6 +58,5 @@ const auth = (...roles: string[]) => {
         }
     };
 };
-
 
 export default auth;

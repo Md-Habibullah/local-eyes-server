@@ -109,8 +109,13 @@ model Guide {
 
   isVerified Boolean @default(false)
 
+  // OTP fields
   otp          String?
   otpExpiresAt DateTime?
+
+  // ⛔ rate-limit fields
+  otpAttempts   Int       @default(0)
+  otpLastSentAt DateTime?
 
   user User @relation(fields: [userId], references: [id])
 

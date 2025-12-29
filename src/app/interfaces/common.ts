@@ -1,6 +1,18 @@
 import { UserRole } from "../../generated/prisma/enums";
 
-export type IAuthUser = {
+export interface IAuthUser {
+    userId: string;
     email: string;
-    role: UserRole
-} | null;
+    role: UserRole;
+
+    tourist?: {
+        id: string;
+    } | null;
+
+    guide?: {
+        id: string;
+        isVerified?: boolean;
+    } | null;
+
+    admin?: null; // keep for symmetry / future use
+}

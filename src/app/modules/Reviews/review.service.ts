@@ -3,14 +3,15 @@ import httpStatus from 'http-status';
 import { prisma } from '../../../lib/prisma';
 import ApiError from '../../errors/apiError';
 import { BookingStatus } from '../../../generated/prisma/enums';
+import { IAuthUser } from '../../interfaces/common';
 
 // ===============================
 // CREATE REVIEW (TOURIST)
 // ===============================
-const createReview = async (req: Request & { user?: any }) => {
+const createReview = async (req: Request) => {
     const tourist = await prisma.tourist.findFirstOrThrow({
         where: {
-            user: { email: req.user.email },
+            user: { email: req.user?.email },
         },
     });
 

@@ -32,14 +32,16 @@ const addToWishlist = async (touristId: string, tourId: string) => {
 };
 
 const removeFromWishlist = async (touristId: string, tourId: string) => {
-    await prisma.wishlist.delete({
+    const result = await prisma.wishlist.deleteMany({
         where: {
-            touristId_tourId: {
-                touristId,
-                tourId,
-            },
+            touristId,
+            tourId,
         },
     });
+
+    if (result.count === 0) {
+        throw new Error("Wishlist item not found"); // map to 404 in controller
+    }
 
     return true;
 };

@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
 import config from ".";
 import { UserRole, UserStatus } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
-import * as bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { IPassportUser } from "../app/interfaces/passport.interface";
 
 passport.use(
     new GoogleStrategy(
@@ -14,33 +15,48 @@ passport.use(
             clientSecret: config.google.google_client_secret || "",
             callbackURL: config.google.google_callback_url,
         },
-        async (_accessToken, _refreshToken, profile, done) => {
+        async (
+            _accessToken: string,
+            _refreshToken: string,
+            profile: Profile,
+            done
+        ) => {
             try {
-                // 1️⃣ check provider
-                const auth = await prisma.authProviderModel.findUnique({
+                // 1️⃣ Check auth provider
+                const authProvider = await prisma.authProviderModel.findUnique({
                     where: {
                         provider_providerId: {
                             provider: "GOOGLE",
                             providerId: profile.id,
                         },
                     },
+                    include: {
+                        user: true,
+                    },
                 });
 
-                if (auth) {
-                    const user = await prisma.user.findUnique({
-                        where: { id: auth.userId },
-                    });
-                    if (!user || user.status !== UserStatus.ACTIVE)
+                if (authProvider) {
+                    const user = authProvider.user;
+
+                    if (!user || user.status !== UserStatus.ACTIVE) {
                         return done(null, false);
-                    return done(null, user);
+                    }
+
+                    const passportUser: IPassportUser = {
+                        userId: user.id,
+                        email: user.email,
+                        role: user.role,
+                    };
+
+                    return done(null, passportUser);
                 }
 
-                // 2️⃣ email
+                // 2️⃣ Email validation
                 const email = profile.emails?.[0]?.value;
                 if (!email) return done(null, false);
 
-                // 3️⃣ find user
-                let user = await prisma.user.findFirst({ where: { email } });
+                // 3️⃣ Find or create user
+                let user = await prisma.user.findUnique({ where: { email } });
 
                 if (!user) {
                     const defaultPassword = await bcrypt.hash(
@@ -58,15 +74,8 @@ passport.use(
                             },
                         });
 
-                        await tx.authProviderModel.upsert({
-                            where: {
-                                provider_providerId: {
-                                    provider: "GOOGLE",
-                                    providerId: profile.id,
-                                },
-                            },
-                            update: {},
-                            create: {
+                        await tx.authProviderModel.create({
+                            data: {
                                 provider: "GOOGLE",
                                 providerId: profile.id,
                                 userId: createdUser.id,
@@ -102,12 +111,19 @@ passport.use(
                     });
                 }
 
-                if (user.status !== UserStatus.ACTIVE)
+                if (user.status !== UserStatus.ACTIVE) {
                     return done(null, false);
+                }
 
-                return done(null, user);
+                const passportUser: IPassportUser = {
+                    userId: user.id,
+                    email: user.email,
+                    role: user.role,
+                };
+
+                return done(null, passportUser);
             } catch (error) {
-                console.error("google strategy error", error);
+                console.error("Google strategy error:", error);
                 return done(error);
             }
         }
@@ -116,15 +132,34 @@ passport.use(
 
 
 
-passport.serializeUser((user: any, done) => {
-    done(null, user.id)
-})
+passport.serializeUser((user: IPassportUser, done) => {
+    done(null, user.userId);
+});
 
-passport.deserializeUser(async (id: string, done: any) => {
+passport.deserializeUser(async (id: string, done) => {
     try {
-        const user = await prisma.user.findUnique({ where: { id } })
-        done(null, user)
+        const user = await prisma.user.findUnique({
+            where: { id }, // id is now string
+            select: {
+                id: true,
+                email: true,
+                role: true,
+                status: true,
+            },
+        });
+
+        if (!user || user.status !== UserStatus.ACTIVE) {
+            return done(null, false);
+        }
+
+        const passportUser: IPassportUser = {
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+        };
+
+        done(null, passportUser);
     } catch (error) {
-        done(error)
+        done(error);
     }
-})
+});
