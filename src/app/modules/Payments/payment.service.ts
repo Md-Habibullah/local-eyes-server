@@ -14,7 +14,7 @@ import config from '../../../config';
 // ===============================
 const initPayment = async (req: Request) => {
     const tourist = await prisma.tourist.findFirstOrThrow({
-        where: { user: { email: req.user?.email } },
+        where: { userId: req.user!.userId },
     });
 
     const booking = await prisma.booking.findUniqueOrThrow({

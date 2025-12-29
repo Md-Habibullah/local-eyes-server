@@ -11,8 +11,8 @@ import { IAuthUser } from '../../interfaces/IAuthUser';
 const createReview = async (req: Request) => {
     const tourist = await prisma.tourist.findFirstOrThrow({
         where: {
-            user: { email: req.user?.email },
-        },
+            userId: req.user!.userId
+        }
     });
 
     const booking = await prisma.booking.findUniqueOrThrow({
