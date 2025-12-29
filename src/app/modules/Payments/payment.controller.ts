@@ -6,7 +6,7 @@ import { PaymentServices } from './payment.service';
 import config from '../../../config';
 
 const initPayment = catchAsync(
-    async (req: Request & { user?: any }, res: Response) => {
+    async (req: Request, res: Response) => {
         const result = await PaymentServices.initPayment(req);
 
         sendResponse(res, {

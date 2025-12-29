@@ -6,8 +6,8 @@ import httpStatus from "http-status";
 import { WishlistServices } from "./wishlist.service";
 
 const addToWishlist = catchAsync(
-    async (req: Request & { user?: any }, res: Response) => {
-        const touristId = req.user.tourist.id;
+    async (req: Request, res: Response) => {
+        const touristId = req.user?.tourist?.id || '';
         const { tourId } = req.body;
 
         const result = await WishlistServices.addToWishlist(touristId, tourId);
@@ -22,8 +22,8 @@ const addToWishlist = catchAsync(
 );
 
 const removeFromWishlist = catchAsync(
-    async (req: Request & { user?: any }, res: Response) => {
-        const touristId = req.user.tourist.id;
+    async (req: Request, res: Response) => {
+        const touristId = req.user?.tourist?.id || '';
         const { tourId } = req.params;
 
         await WishlistServices.removeFromWishlist(touristId, tourId);
@@ -38,8 +38,8 @@ const removeFromWishlist = catchAsync(
 );
 
 const getMyWishlist = catchAsync(
-    async (req: Request & { user?: any }, res: Response) => {
-        const touristId = req.user.tourist.id;
+    async (req: Request, res: Response) => {
+        const touristId = req.user?.tourist?.id || '';
 
         const result = await WishlistServices.getMyWishlist(touristId);
 

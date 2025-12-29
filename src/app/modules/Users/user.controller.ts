@@ -6,7 +6,7 @@ import pick from '../../../shared/pick';
 import { UserServices } from './user.service';
 import { userFilterableFields } from './user.constant';
 import { paginationFields } from '../../constrains';
-import { IAuthUser } from '../../interfaces/common';
+import { IAuthUser } from '../../interfaces/IAuthUser';
 
 
 const getMyProfile = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {

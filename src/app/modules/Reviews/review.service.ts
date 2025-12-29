@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import { prisma } from '../../../lib/prisma';
 import ApiError from '../../errors/apiError';
 import { BookingStatus } from '../../../generated/prisma/enums';
-import { IAuthUser } from '../../interfaces/common';
+import { IAuthUser } from '../../interfaces/IAuthUser';
 
 // ===============================
 // CREATE REVIEW (TOURIST)

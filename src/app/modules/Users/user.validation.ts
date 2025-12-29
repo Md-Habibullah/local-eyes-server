@@ -40,7 +40,7 @@ const updateProfile = z.object({
     contactNumber: z.string().optional(),
     languages: z.array(z.string()).optional(),
 
-    preferences: z.string().optional(),
+    preferences: z.array(z.string()).optional(),
     expertise: z.array(z.string()).optional(),
     dailyRate: z.number().optional(),
 });

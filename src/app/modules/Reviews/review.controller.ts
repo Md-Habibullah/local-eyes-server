@@ -7,7 +7,7 @@ import sendResponse from '../../../shared/sendResponse';
 import pick from '../../../shared/pick';
 
 const createReview = catchAsync(
-    async (req: Request & { user?: any }, res: Response) => {
+    async (req: Request, res: Response) => {
         const result = await ReviewServices.createReview(req);
 
         sendResponse(res, {

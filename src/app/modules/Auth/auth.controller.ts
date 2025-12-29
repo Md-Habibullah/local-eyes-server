@@ -255,6 +255,7 @@ export const googleCallbackController = catchAsync(
 
         // 2️⃣ Create JWT token manually
         const payload = {
+            userId: user.userId,
             email: user.email,
             role: user.role,
         }

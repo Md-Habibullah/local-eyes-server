@@ -9,10 +9,10 @@ import { IPaginationOptions } from '../../interfaces/pagination';
 // ===============================
 // CREATE BOOKING (TOURIST)
 // ===============================
-const createBooking = async (req: Request & { user?: any }) => {
+const createBooking = async (req: Request) => {
     const tourist = await prisma.tourist.findFirstOrThrow({
         where: {
-            user: { email: req.user.email },
+            user: { email: req.user?.email },
         },
     });
 
@@ -89,7 +89,7 @@ const getAllBookings = async (
 // ===============================
 // UPDATE BOOKING STATUS (GUIDE)
 // ===============================
-const updateBookingStatus = async (req: Request & { user?: any }) => {
+const updateBookingStatus = async (req: Request) => {
     const { id } = req.params;
 
     const booking = await prisma.booking.findUniqueOrThrow({
@@ -97,7 +97,7 @@ const updateBookingStatus = async (req: Request & { user?: any }) => {
     });
 
     const guide = await prisma.guide.findFirstOrThrow({
-        where: { user: { email: req.user.email } },
+        where: { user: { email: req.user?.email } },
     });
 
     // ownership check

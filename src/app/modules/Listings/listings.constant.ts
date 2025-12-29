@@ -9,7 +9,8 @@ export const tourFilterableFields: string[] = [
     'searchTerm',
     'city',
     'category',
-    'price',
+    'minPrice',
+    'maxPrice',
     'isActive',
     'guideId',
 ];

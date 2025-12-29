@@ -5,7 +5,7 @@ import config from "../../config";
 import { jwtHelpers } from "../../helpers/jwtHelpers";
 import ApiError from "../errors/apiError";
 import { prisma } from "../../lib/prisma";
-import { IAuthUser } from "../interfaces/common";
+import { IAuthUser } from "../interfaces/IAuthUser";
 
 const auth = (...roles: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -44,8 +44,7 @@ const auth = (...roles: string[]) => {
             req.user = {
                 ...verifiedUser,
                 tourist: verifiedUser.role === "TOURIST" ? profile : null,
-                guide: verifiedUser.role === "GUIDE" ? profile : null,
-                admin: verifiedUser.role === "ADMIN" ? null : null,
+                guide: verifiedUser.role === "GUIDE" ? profile : null
             };
 
             if (roles.length && !roles.includes(req.user.role)) {

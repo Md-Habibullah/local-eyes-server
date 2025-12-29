@@ -5,8 +5,9 @@ import sendResponse from '../../../shared/sendResponse';
 import httpStatus from 'http-status';
 import { GuideServices } from './guide.service';
 
-const sendOtp = catchAsync(async (req: Request & { user?: any }, res: Response) => {
-    await GuideServices.sendVerificationOtp(req.user.email);
+const sendOtp = catchAsync(async (req: Request, res: Response) => {
+    const email = req.user?.email || ""
+    await GuideServices.sendVerificationOtp(email);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -16,10 +17,11 @@ const sendOtp = catchAsync(async (req: Request & { user?: any }, res: Response) 
     });
 });
 
-const verifyOtp = catchAsync(async (req: Request & { user?: any }, res: Response) => {
+const verifyOtp = catchAsync(async (req: Request, res: Response) => {
     const { otp } = req.body;
+    const email = req.user?.email || ""
 
-    await GuideServices.verifyGuideOtp(req.user.email, otp);
+    await GuideServices.verifyGuideOtp(email, otp);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -31,8 +33,9 @@ const verifyOtp = catchAsync(async (req: Request & { user?: any }, res: Response
 
 // src/app/modules/guide/guide.controller.ts
 
-const resendOtp = catchAsync(async (req: Request & { user?: any }, res: Response) => {
-    await GuideServices.resendVerificationOtp(req.user.email);
+const resendOtp = catchAsync(async (req: Request, res: Response) => {
+    const email = req.user?.email || ""
+    await GuideServices.resendVerificationOtp(email);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

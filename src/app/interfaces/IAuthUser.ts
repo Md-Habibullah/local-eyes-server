@@ -13,6 +13,4 @@ export interface IAuthUser {
         id: string;
         isVerified?: boolean;
     } | null;
-
-    admin?: null; // keep for symmetry / future use
 }

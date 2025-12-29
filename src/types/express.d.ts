@@ -1,4 +1,4 @@
-import { IAuthUser } from "../app/interfaces/common";
+import { IAuthUser } from "../app/interfaces/IAuthUser";
 
 
 declare global {

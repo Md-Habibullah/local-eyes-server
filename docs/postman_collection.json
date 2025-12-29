@@ -1,0 +1,68 @@
+{
+  "info": {
+    "name": "Local Guide Platform - Template",
+    "_postman_id": "local-guide-template",
+    "description": "Template requests for backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Register",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user\": { \"email\": \"tourist@example.com\", \"role\": \"TOURIST\" },\n  \"password\": \"password123\",\n  \"name\": \"Test Tourist\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/login",
+        "body": { "mode": "raw", "raw": "{ \"email\": \"tourist@example.com\", \"password\": \"password123\" }" }
+      }
+    },
+    {
+      "name": "Listings - Create (guide)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/listings",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "body": { "mode": "formdata", "formdata": [
+          { "key": "data", "value": "{ \"title\": \"Sample Tour\", \"price\": 10 }", "type": "text" }
+        ] }
+      }
+    },
+    {
+      "name": "Bookings - Create",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/bookings",
+        "header": [ { "key": "Authorization", "value": "Bearer {{accessToken}}" } ],
+        "body": { "mode": "raw", "raw": "{ \"tourId\": \"<tour-uuid>\", \"date\": \"2025-12-31\", \"numberOfPeople\": 2 }" }
+      }
+    },
+    {
+      "name": "Payments - Init SSLCommerz",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/payments/booking/:bookingId",
+        "header": [ { "key": "Authorization", "value": "Bearer {{accessToken}}" } ]
+      }
+    },
+    {
+      "name": "Guides - Send OTP",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/guides/verify/send-otp",
+        "header": [ { "key": "Authorization", "value": "Bearer {{accessToken}}" } ]
+      }
+    }
+  ]
+}

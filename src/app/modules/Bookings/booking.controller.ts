@@ -8,7 +8,7 @@ import { BookingServices } from './booking.service';
 import { paginationFields } from '../../constrains';
 
 const createBooking = catchAsync(
-    async (req: Request & { user?: any }, res: Response) => {
+    async (req: Request, res: Response) => {
         const result = await BookingServices.createBooking(req);
 
         sendResponse(res, {
@@ -21,7 +21,7 @@ const createBooking = catchAsync(
 );
 
 const getAllBookings = catchAsync(
-    async (req: Request & { user?: any }, res: Response) => {
+    async (req: Request, res: Response) => {
         const filters = pick(req.query, bookingFilterableFields);
         const paginationOptions = pick(req.query, paginationFields);
 
@@ -42,7 +42,7 @@ const getAllBookings = catchAsync(
 );
 
 const updateBookingStatus = catchAsync(
-    async (req: Request & { user?: any }, res: Response) => {
+    async (req: Request, res: Response) => {
         const result = await BookingServices.updateBookingStatus(req);
 
         sendResponse(res, {

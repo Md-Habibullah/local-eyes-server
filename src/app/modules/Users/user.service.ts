@@ -7,7 +7,7 @@ import { UserRole, UserStatus } from '../../../generated/prisma/enums';
 import { userSearchableFields } from './user.constant';
 import { paginationHelper } from '../../../helpers/paginationHelper';
 import { IPaginationOptions } from '../../interfaces/pagination';
-import { IAuthUser } from '../../interfaces/common';
+import { IAuthUser } from '../../interfaces/IAuthUser';
 import { get } from 'http';
 import { Guide, Tourist } from '../../../generated/prisma/client';
 import { fileUploader } from '../../../helpers/fileUploader';
@@ -261,8 +261,8 @@ const updateProfile = async (user: IAuthUser, id: string, req: Request) => {
 
     const file = req.file;
     if (file) {
-        const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
-        req.body.profilePhoto = uploadToCloudinary?.secure_url;
+        const upload = await fileUploader.uploadToCloudinary(file);
+        payload.profilePhoto = upload.secure_url;
     }
 
     let profileInfo;

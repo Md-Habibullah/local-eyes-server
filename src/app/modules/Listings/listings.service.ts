@@ -17,11 +17,11 @@ import { IPaginationOptions } from '../../interfaces/pagination';
 // ===============================
 // CREATE TOUR
 // ===============================
-const createTour = async (req: Request & { user?: any }) => {
+const createTour = async (req: Request) => {
     const guide = await prisma.guide.findFirstOrThrow({
         where: {
             user: {
-                email: req.user.email,
+                email: req.user?.email,
                 role: UserRole.GUIDE,
                 status: UserStatus.ACTIVE,
             },
@@ -56,7 +56,7 @@ const createTour = async (req: Request & { user?: any }) => {
 // ===============================
 // UPDATE TOUR
 // ===============================
-const updateTour = async (req: Request & { user?: any }) => {
+const updateTour = async (req: Request) => {
     const { id } = req.params;
 
     const existingTour = await prisma.tour.findUniqueOrThrow({
@@ -66,7 +66,7 @@ const updateTour = async (req: Request & { user?: any }) => {
     const guide = await prisma.guide.findFirstOrThrow({
         where: {
             user: {
-                email: req.user.email,
+                email: req.user?.email,
                 role: UserRole.GUIDE,
             },
         },
@@ -113,6 +113,7 @@ const getAllTours = async (
 
     const andConditions: any[] = [];
 
+    // SEARCH
     if (searchTerm) {
         andConditions.push({
             OR: tourSearchableFields.map((field) => ({
@@ -124,6 +125,25 @@ const getAllTours = async (
         });
     }
 
+    // PRICE RANGE FILTER (minPrice & maxPrice)
+    if (filterData.minPrice || filterData.maxPrice) {
+        andConditions.push({
+            price: {
+                gte: filterData.minPrice
+                    ? Number(filterData.minPrice)
+                    : undefined,
+                lte: filterData.maxPrice
+                    ? Number(filterData.maxPrice)
+                    : undefined,
+            },
+        });
+
+        // important: remove handled fields
+        delete filterData.minPrice;
+        delete filterData.maxPrice;
+    }
+
+    // OTHER FILTERS (city, category, guideId, etc.)
     if (Object.keys(filterData).length) {
         andConditions.push({
             AND: Object.entries(filterData).map(([key, value]) => ({
@@ -132,7 +152,7 @@ const getAllTours = async (
         });
     }
 
-    // Only active tours
+    // ONLY ACTIVE TOURS
     andConditions.push({
         isActive: true,
     });
@@ -175,6 +195,7 @@ const getAllTours = async (
         data: result,
     };
 };
+
 
 // ===============================
 // GET SINGLE TOUR
@@ -220,7 +241,7 @@ const getTourById = async (id: string) => {
 // ===============================
 // DELETE TOUR (SOFT DELETE)
 // ===============================
-const deleteTour = async (req: Request & { user?: any }) => {
+const deleteTour = async (req: Request) => {
     const { id } = req.params;
 
     const tour = await prisma.tour.findUniqueOrThrow({
@@ -230,7 +251,7 @@ const deleteTour = async (req: Request & { user?: any }) => {
     const guide = await prisma.guide.findFirstOrThrow({
         where: {
             user: {
-                email: req.user.email,
+                email: req.user?.email,
             },
         },
     });

@@ -12,9 +12,9 @@ import config from '../../../config';
 // ===============================
 // INIT SSL PAYMENT (TOURIST)
 // ===============================
-const initPayment = async (req: Request & { user?: any }) => {
+const initPayment = async (req: Request) => {
     const tourist = await prisma.tourist.findFirstOrThrow({
-        where: { user: { email: req.user.email } },
+        where: { user: { email: req.user?.email } },
     });
 
     const booking = await prisma.booking.findUniqueOrThrow({
@@ -62,7 +62,7 @@ const initPayment = async (req: Request & { user?: any }) => {
         product_category: 'Tour',
         product_profile: 'general',
         cus_name: tourist.name,
-        cus_email: req.user.email,
+        cus_email: req.user?.email,
         cus_add1: tourist.address || 'Dhaka',
         cus_phone: tourist.contactNumber || '01700000000',
     };
