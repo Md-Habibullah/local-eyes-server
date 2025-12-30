@@ -6,6 +6,8 @@ import { TourRoutes } from '../modules/Listings/listings.route';
 import { PaymentRoutes } from '../modules/Payments/payment.route';
 import { BookingRoutes } from '../modules/Bookings/booking.route';
 import { ReviewRoutes } from '../modules/Reviews/review.routes';
+import { WishlistRoutes } from '../modules/Wishlist/wishlist.route';
+import { GuideRoutes } from '../modules/Guides/guide.routes';
 
 const router = express.Router();
 
@@ -29,12 +31,20 @@ const moduleRoutes = [
         route: BookingRoutes
     },
     {
+        path: '/guides',
+        route: GuideRoutes
+    },
+    {
         path: '/payments',
         route: PaymentRoutes
     },
     {
         path: '/reviews',
         route: ReviewRoutes
+    },
+    {
+        path: '/wishlists',
+        route: WishlistRoutes
     }
     // {
     //     path: '/meta',

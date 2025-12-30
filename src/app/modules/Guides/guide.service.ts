@@ -1,13 +1,14 @@
 import { prisma } from "../../../lib/prisma";
 import { generateOTP, OTP_EXPIRY_MINUTES, OTP_RESEND_LIMIT, OTP_RESEND_WINDOW_MS } from "../../../helpers/otp";
-import { sendOtpMail } from "../../../helpers/sendOtpMail";
+// import { sendOtpMail } from "../../../helpers/sendOtpMail.js";
 import ApiError from "../../errors/apiError";
 import httpStatus from "http-status";
+import { sendOtpMail } from "../../../helpers/sendOtpMail";
 
 /* ---------------- SEND OTP ---------------- */
-const sendVerificationOtp = async (userEmail: string) => {
+const sendVerificationOtp = async (userId: string) => {
     const guide = await prisma.guide.findFirstOrThrow({
-        where: { user: { email: userEmail } },
+        where: { userId },
         include: { user: true },
     });
 
@@ -35,9 +36,9 @@ const sendVerificationOtp = async (userEmail: string) => {
 };
 
 /* ---------------- VERIFY OTP ---------------- */
-const verifyGuideOtp = async (email: string, otp: string) => {
+const verifyGuideOtp = async (userId: string, otp: string) => {
     const guide = await prisma.guide.findFirstOrThrow({
-        where: { user: { email } },
+        where: { userId },
     });
 
     if (!guide.otp || guide.otp !== otp) {
@@ -63,9 +64,9 @@ const verifyGuideOtp = async (email: string, otp: string) => {
 };
 
 /* ---------------- RESEND OTP (RATE-LIMITED) ---------------- */
-const resendVerificationOtp = async (userEmail: string) => {
+const resendVerificationOtp = async (userId: string) => {
     const guide = await prisma.guide.findFirstOrThrow({
-        where: { user: { email: userEmail } },
+        where: { user: { id: userId } },
         include: { user: true },
     });
 

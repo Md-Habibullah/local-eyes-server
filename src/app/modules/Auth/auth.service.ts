@@ -417,6 +417,7 @@ const getMe = async (user: { accessToken: string; refreshToken: string }) => {
                     address: true,
                     languages: true,
                     expertise: true,
+                    isVerified: true,
                     dailyRate: true,
                     createdAt: true,
                     updatedAt: true,

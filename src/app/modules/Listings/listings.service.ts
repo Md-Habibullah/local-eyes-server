@@ -203,7 +203,6 @@ const getAllTours = async (
     };
 };
 
-
 // ===============================
 // GET SINGLE TOUR
 // ===============================
@@ -256,11 +255,15 @@ const getMyTours = async (req: Request) => {
     const userId = user?.userId;
 
     if (user.role !== UserRole.GUIDE) {
-        throw new ApiError(httpStatus.FORBIDDEN, "Only guide can see his listings")
+        throw new ApiError(
+            httpStatus.FORBIDDEN,
+            "Only guide can see his listings"
+        );
     }
 
     const guide = await prisma.guide.findFirst({
         where: { userId },
+        select: { id: true },
     });
 
     if (!guide) {
@@ -280,10 +283,9 @@ const getMyTours = async (req: Request) => {
 
     const andConditions: any[] = [];
 
-    // 🔐 force guide ownership
+    // 🔐 force guide ownership ONLY
     andConditions.push({
         guideId: guide.id,
-        isActive: true
     });
 
     // 🔍 search
@@ -291,7 +293,7 @@ const getMyTours = async (req: Request) => {
         andConditions.push({
             OR: tourSearchableFields.map(field => ({
                 [field]: {
-                    contains: searchTerm,
+                    contains: searchTerm as string,
                     mode: "insensitive",
                 },
             })),
@@ -315,16 +317,14 @@ const getMyTours = async (req: Request) => {
 
     // 💰 price range
     if (minPrice || maxPrice) {
-        const priceCondition: any = {};
-        if (minPrice) priceCondition.gte = Number(minPrice);
-        if (maxPrice) priceCondition.lte = Number(maxPrice);
-
         andConditions.push({
-            price: priceCondition,
+            price: {
+                gte: minPrice ? Number(minPrice) : undefined,
+                lte: maxPrice ? Number(maxPrice) : undefined,
+            },
         });
     }
 
-    // 🧠 final where
     const whereConditions =
         andConditions.length > 0 ? { AND: andConditions } : {};
 
@@ -335,13 +335,9 @@ const getMyTours = async (req: Request) => {
             where: whereConditions,
             skip,
             take: Number(limit),
-            orderBy: {
-                createdAt: "desc",
-            },
+            orderBy: { createdAt: "desc" },
         }),
-        prisma.tour.count({
-            where: whereConditions,
-        }),
+        prisma.tour.count({ where: whereConditions }),
     ]);
 
     return {
@@ -354,6 +350,7 @@ const getMyTours = async (req: Request) => {
         data: tours,
     };
 };
+
 
 // ===============================
 // DELETE TOUR (SOFT DELETE)

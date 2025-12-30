@@ -24,5 +24,4 @@ router.post(
     GuideController.resendOtp
 );
 
-
 export const GuideRoutes = router;

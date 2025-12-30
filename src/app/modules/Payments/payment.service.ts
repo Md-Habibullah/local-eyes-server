@@ -106,6 +106,7 @@ const paymentSuccess = async (tranId: string) => {
             data: {
                 isPaid: true,
                 paymentStatus: PaymentStatus.COMPLETED,
+                status: BookingStatus.COMPLETED,
                 paidAt: new Date(),
                 guidePayoutAmount: Math.floor(payment.amount * 0.8),
                 isGuidePaid: false,
