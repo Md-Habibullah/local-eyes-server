@@ -10,24 +10,81 @@ import { JwtPayload } from '../../interfaces/jwt.interface';
 // ===============================
 // CREATE BOOKING (TOURIST)
 // ===============================
-const createBooking = async (req: Request) => {
-    const tourist = await prisma.tourist.findFirstOrThrow({
+const createBooking = async (req: Request & { user?: any }) => {
+    const { tourId, date, numberOfPeople } = req.body;
+
+    const bookingDate = new Date(date);
+
+    // 🔒 past date block
+    if (bookingDate < new Date()) {
+        throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            "You cannot book a tour for a past date"
+        );
+    }
+
+    const tourist = await prisma.tourist.findUnique({
         where: { userId: req.user!.userId },
     });
 
-    const tour = await prisma.tour.findUniqueOrThrow({
-        where: { id: req.body.tourId, isActive: true },
+    if (!tourist) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Tourist not found");
+    }
+
+    const tour = await prisma.tour.findUnique({
+        where: { id: tourId, isActive: true },
     });
 
-    const totalAmount = tour.price * req.body.numberOfPeople;
+    if (!tour) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Tour not found");
+    }
+
+    // 🚫 check duplicate booking by same tourist
+    const existingBooking = await prisma.booking.findFirst({
+        where: {
+            touristId: tourist.id,
+            tourId: tour.id,
+            date: bookingDate,
+            status: {
+                not: "CANCELLED",
+            },
+        },
+    });
+
+    if (existingBooking) {
+        throw new ApiError(
+            httpStatus.CONFLICT,
+            "You already booked this tour for the selected date"
+        );
+    }
+
+    // 🚫 check guide availability (same date)
+    const guideAlreadyBooked = await prisma.booking.findFirst({
+        where: {
+            guideId: tour.guideId,
+            date: bookingDate,
+            status: {
+                in: ["PENDING", "CONFIRMED"],
+            },
+        },
+    });
+
+    if (guideAlreadyBooked) {
+        throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            "Guide is not available on this date"
+        );
+    }
+
+    const totalAmount = tour.price * numberOfPeople;
 
     const booking = await prisma.booking.create({
         data: {
             touristId: tourist.id,
             guideId: tour.guideId,
             tourId: tour.id,
-            date: new Date(req.body.date),
-            numberOfPeople: req.body.numberOfPeople,
+            date: bookingDate,
+            numberOfPeople,
             totalAmount,
         },
     });
@@ -46,24 +103,45 @@ const getAllBookings = async (
     const { page, limit, skip } =
         paginationHelper.calculatePagination(paginationOptions);
 
-    let whereCondition: any = {};
+    const andConditions: any[] = [];
 
-    // role based access
+    // ===============================
+    // ROLE BASED VISIBILITY
+    // ===============================
+
     if (user.role === UserRole.TOURIST) {
         const tourist = await prisma.tourist.findFirstOrThrow({
             where: { user: { email: user.email } },
+            select: { id: true },
         });
-        whereCondition.touristId = tourist.id;
+
+        andConditions.push({ touristId: tourist.id });
     }
 
     if (user.role === UserRole.GUIDE) {
         const guide = await prisma.guide.findFirstOrThrow({
             where: { user: { email: user.email } },
+            select: { id: true },
         });
-        whereCondition.guideId = guide.id;
+
+        andConditions.push({ guideId: guide.id });
     }
 
-    Object.assign(whereCondition, filters);
+    // ADMIN → no restriction (sees all)
+
+    // ===============================
+    // FILTERS (status, tourId, etc.)
+    // ===============================
+    if (Object.keys(filters).length) {
+        andConditions.push({
+            AND: Object.entries(filters).map(([key, value]) => ({
+                [key]: value,
+            })),
+        });
+    }
+
+    const whereCondition =
+        andConditions.length > 0 ? { AND: andConditions } : {};
 
     const data = await prisma.booking.findMany({
         where: whereCondition,
@@ -72,12 +150,26 @@ const getAllBookings = async (
         orderBy: { createdAt: 'desc' },
         include: {
             tour: true,
-            tourist: true,
-            guide: true,
+            tourist: {
+                select: {
+                    id: true,
+                    name: true,
+                    profilePhoto: true,
+                },
+            },
+            guide: {
+                select: {
+                    id: true,
+                    name: true,
+                    profilePhoto: true,
+                },
+            },
         },
     });
 
-    const total = await prisma.booking.count({ where: whereCondition });
+    const total = await prisma.booking.count({
+        where: whereCondition,
+    });
 
     return {
         meta: { page, limit, total },

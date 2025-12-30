@@ -6,6 +6,7 @@ import { TourServices } from './listings.service';
 import pick from '../../../shared/pick';
 import { tourFilterableFields } from './listings.constant';
 import { paginationFields } from '../../constrains';
+import { JwtPayload } from '../../interfaces/jwt.interface';
 
 const createTour = catchAsync(
     async (req: Request, res: Response) => {
@@ -62,6 +63,20 @@ const getTourById = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getMyTours = catchAsync(
+    async (req: Request, res: Response) => {
+        const result = await TourServices.getMyTours(req);
+
+        sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "My tours retrieved successfully",
+            meta: result.meta,
+            data: result.data,
+        });
+    }
+);
+
 const deleteTour = catchAsync(async (req: Request, res: Response) => {
     const result = await TourServices.deleteTour(req);
 
@@ -78,5 +93,6 @@ export const TourController = {
     updateTour,
     getAllTours,
     getTourById,
+    getMyTours,
     deleteTour,
 };

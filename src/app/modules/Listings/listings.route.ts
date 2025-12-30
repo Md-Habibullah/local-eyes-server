@@ -20,6 +20,24 @@ router.post(
     }
 );
 
+
+router.get(
+    '/',
+    TourController.getAllTours
+);
+
+router.get(
+    "/my-listings",
+    auth(UserRole.GUIDE),
+    TourController.getMyTours
+);
+
+router.get(
+    '/:id',
+    TourController.getTourById
+);
+
+
 // UPDATE TOUR
 router.patch(
     '/:id',
@@ -33,12 +51,9 @@ router.patch(
     }
 );
 
-router.get('/', TourController.getAllTours);
-router.get('/:id', TourController.getTourById);
-
 router.delete(
     '/:id',
-    auth(UserRole.GUIDE),
+    auth(UserRole.GUIDE, UserRole.ADMIN),
     TourController.deleteTour
 );
 

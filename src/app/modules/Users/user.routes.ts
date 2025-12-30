@@ -33,6 +33,7 @@ router.patch(
 // public get user by id
 router.get(
     '/:id',
+    auth(UserRole.ADMIN, UserRole.GUIDE, UserRole.TOURIST),
     UserController.getUserById
 );
 

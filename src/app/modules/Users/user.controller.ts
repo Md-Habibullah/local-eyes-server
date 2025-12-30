@@ -110,7 +110,7 @@ const unblockUser = catchAsync(async (req: Request, res: Response) => {
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: 'User blocked successfully',
+        message: 'User unblocked successfully',
         data: result,
     });
 });

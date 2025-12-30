@@ -13,6 +13,7 @@ import {
     UserStatus,
 } from '../../../generated/prisma/enums';
 import { IPaginationOptions } from '../../interfaces/pagination';
+import { JwtPayload } from '../../interfaces/jwt.interface';
 
 // ===============================
 // CREATE TOUR
@@ -207,7 +208,7 @@ const getAllTours = async (
 // GET SINGLE TOUR
 // ===============================
 const getTourById = async (id: string) => {
-    const tour = await prisma.tour.findUniqueOrThrow({
+    const tour = await prisma.tour.findUnique({
         where: {
             id,
             isActive: true,
@@ -241,7 +242,117 @@ const getTourById = async (id: string) => {
         },
     });
 
+    if (!tour) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Tour not found")
+    }
+
     return tour;
+};
+
+// get my tour
+const getMyTours = async (req: Request) => {
+    const query = req.query;
+    const user = req.user as JwtPayload;
+    const userId = user?.userId;
+
+    if (user.role !== UserRole.GUIDE) {
+        throw new ApiError(httpStatus.FORBIDDEN, "Only guide can see his listings")
+    }
+
+    const guide = await prisma.guide.findFirst({
+        where: { userId },
+    });
+
+    if (!guide) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Guide not found");
+    }
+
+    const {
+        searchTerm,
+        city,
+        category,
+        minPrice,
+        maxPrice,
+        isActive,
+        page = 1,
+        limit = 10,
+    } = query;
+
+    const andConditions: any[] = [];
+
+    // 🔐 force guide ownership
+    andConditions.push({
+        guideId: guide.id,
+        isActive: true
+    });
+
+    // 🔍 search
+    if (searchTerm) {
+        andConditions.push({
+            OR: tourSearchableFields.map(field => ({
+                [field]: {
+                    contains: searchTerm,
+                    mode: "insensitive",
+                },
+            })),
+        });
+    }
+
+    // 🎯 filters
+    if (city) {
+        andConditions.push({ city });
+    }
+
+    if (category) {
+        andConditions.push({ category });
+    }
+
+    if (isActive !== undefined) {
+        andConditions.push({
+            isActive: isActive === "true",
+        });
+    }
+
+    // 💰 price range
+    if (minPrice || maxPrice) {
+        const priceCondition: any = {};
+        if (minPrice) priceCondition.gte = Number(minPrice);
+        if (maxPrice) priceCondition.lte = Number(maxPrice);
+
+        andConditions.push({
+            price: priceCondition,
+        });
+    }
+
+    // 🧠 final where
+    const whereConditions =
+        andConditions.length > 0 ? { AND: andConditions } : {};
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [tours, total] = await prisma.$transaction([
+        prisma.tour.findMany({
+            where: whereConditions,
+            skip,
+            take: Number(limit),
+            orderBy: {
+                createdAt: "desc",
+            },
+        }),
+        prisma.tour.count({
+            where: whereConditions,
+        }),
+    ]);
+
+    return {
+        meta: {
+            page: Number(page),
+            limit: Number(limit),
+            total,
+            totalPages: Math.ceil(total / Number(limit)),
+        },
+        data: tours,
+    };
 };
 
 // ===============================
@@ -287,5 +398,6 @@ export const TourServices = {
     updateTour,
     getAllTours,
     getTourById,
+    getMyTours,
     deleteTour,
 };
