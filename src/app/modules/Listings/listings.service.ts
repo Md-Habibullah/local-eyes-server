@@ -32,13 +32,12 @@ const createTour = async (req: Request) => {
         where: { userId: req.user!.userId },
     });
 
-    //! will be added at leter
-    // if (!guide.isVerified) {
-    //     throw new ApiError(
-    //         httpStatus.FORBIDDEN,
-    //         'Please verify your guide profile first'
-    //     );
-    // }
+    if (!guide.isVerified) {
+        throw new ApiError(
+            httpStatus.FORBIDDEN,
+            'Please verify your guide profile first'
+        );
+    }
 
     const file = req.file;
 
@@ -79,13 +78,12 @@ const updateTour = async (req: Request) => {
         where: { userId: req.user!.userId },
     });
 
-    //! will be added at leter
-    // if (!guide.isVerified) {
-    //     throw new ApiError(
-    //         httpStatus.FORBIDDEN,
-    //         'Please verify your guide profile first'
-    //     );
-    // }
+    if (!guide.isVerified) {
+        throw new ApiError(
+            httpStatus.FORBIDDEN,
+            'Please verify your guide profile first'
+        );
+    }
 
     if (existingTour.guideId !== guide.id) {
         throw new ApiError(
