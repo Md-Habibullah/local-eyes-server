@@ -224,9 +224,43 @@ const updateBookingStatus = async (req: Request) => {
     });
 };
 
+const cancelBookingByTourist = async (req: Request) => {
+    const { id } = req.params;
+
+    const booking = await prisma.booking.findUniqueOrThrow({
+        where: { id },
+    });
+
+    const tourist = await prisma.tourist.findFirstOrThrow({
+        where: { userId: req.user!.userId },
+    });
+
+    // ownership check
+    if (booking.touristId !== tourist.id) {
+        throw new ApiError(httpStatus.FORBIDDEN, 'Not allowed');
+    }
+
+    // 🔐 BOOKING WORKFLOW VALIDATION (ADD HERE 👇)
+
+    // completed booking cannot be changed
+    if (booking.status === BookingStatus.COMPLETED || booking.status === BookingStatus.CONFIRMED) {
+        throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            'Confirmed booking cannot be changed'
+        );
+    }
+
+    // safe to update now
+    return prisma.booking.update({
+        where: { id },
+        data: { status: req.body.status },
+    });
+};
+
 
 export const BookingServices = {
     createBooking,
     getAllBookings,
     updateBookingStatus,
+    cancelBookingByTourist
 };

@@ -118,7 +118,7 @@ This backend is built following **clean architecture**, **role-based access cont
 ---
 
 ## 🗂️ Project Structure
-
+```
 src/
 ├── app/
 │ ├── modules/
@@ -142,7 +142,7 @@ src/
 ├── generated
 ├── app.ts
 └── server.ts
-
+```
 
 
 ---

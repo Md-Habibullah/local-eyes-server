@@ -55,8 +55,22 @@ const updateBookingStatus = catchAsync(
     }
 );
 
+const cancelBookingByTourist = catchAsync(
+    async (req: Request, res: Response) => {
+        const result = await BookingServices.cancelBookingByTourist(req);
+
+        sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: 'Booking cancelled',
+            data: result,
+        });
+    }
+);
+
 export const BookingController = {
     createBooking,
     getAllBookings,
     updateBookingStatus,
+    cancelBookingByTourist
 };

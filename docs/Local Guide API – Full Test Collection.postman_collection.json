@@ -1,0 +1,845 @@
+{
+	"info": {
+		"_postman_id": "015578b8-ddd9-4b6f-a72d-7096e5c27733",
+		"name": "Local Guide API – Full Test Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45494176"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register (JSON)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/Habib/Downloads/tourist.jpg"
+								},
+								{
+									"key": "data",
+									"value": "{\n    \"password\": \"123456\",\n    \"user\" : {\n        \"email\": \"habibullah15160@gmail.com\",\n        \"name\": \"Tourist z\",\n        \"gender\": \"MALE\",\n        \"role\": \"GUIDE\"\n    }\n}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login (JSON)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"habibullah15160@gmail.com\",\n  \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh-Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\" : \"12345678\",\r\n    \"newPassword\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/forget-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"forget-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"habibullah15160@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset password",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get me",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tour (Guide)",
+			"item": [
+				{
+					"name": "Create Tour (JSON)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/Habib/Downloads/tourist.jpg"
+								},
+								{
+									"key": "data",
+									"value": "{\n  \"title\": \"Rangpur Tour\",\n  \"description\": \"Explore old Dhaka\",\n  \"itinerary\": \"Lalbagh, Ahsan Manzil\",\n  \"price\": 2000,\n  \"duration\": 6,\n  \"meetingPoint\": \"Gulistan\",\n  \"maxGroupSize\": 5,\n  \"category\": \"HISTORY\",\n  \"city\": \"Dhaka\"\n}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/listings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"listings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Tour",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "data",
+									"value": "{\n\"title\": \"Lalbagh Tour\"\n}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/listings/e44fe2dc-b1ac-48d3-86c5-0e87a2f5be74",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"listings",
+								"e44fe2dc-b1ac-48d3-86c5-0e87a2f5be74"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all tour",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/listings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"listings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get tour by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/listings/1d74bfdf-0603-4bcc-bc96-396fe522dbf2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"listings",
+								"1d74bfdf-0603-4bcc-bc96-396fe522dbf2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tour",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/listings/e44fe2dc-b1ac-48d3-86c5-0e87a2f5be74",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"listings",
+								"e44fe2dc-b1ac-48d3-86c5-0e87a2f5be74"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "my tours",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/listings/my-listings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"listings",
+								"my-listings"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Booking (Tourist)",
+			"item": [
+				{
+					"name": "Book tour",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tourId\": \"3b90d1fa-a865-4d2f-b206-46b87031f5ac\",\r\n  \"date\": \"2026-01-11\",\r\n  \"numberOfPeople\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/bookings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm booking (guide)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": \"CONFIRMED\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/bookings/d4be86cf-b889-4f3b-8640-22045a87fbfd",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings",
+								"d4be86cf-b889-4f3b-8640-22045a87fbfd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "my bookings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bookings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "all bookings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bookings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payment",
+			"item": [
+				{
+					"name": "Payment for booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"tourist@test.com\",\n  \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/booking/d4be86cf-b889-4f3b-8640-22045a87fbfd",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"booking",
+								"d4be86cf-b889-4f3b-8640-22045a87fbfd"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Get all users (admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get me public",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "data",
+									"value": "{\n    \"name\": \"Mr. Tourist 1\",\n    \"bio\": \"I love islands\"\n}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/users/3d09a5f5-280e-4d8c-9aac-da054face213",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"3d09a5f5-280e-4d8c-9aac-da054face213"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get by id (public)",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get by id (admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/c5597229-fa2a-48e8-b7c3-23b064b76b9e/adminonly",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"c5597229-fa2a-48e8-b7c3-23b064b76b9e",
+								"adminonly"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Block (admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/c5597229-fa2a-48e8-b7c3-23b064b76b9e/block",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"c5597229-fa2a-48e8-b7c3-23b064b76b9e",
+								"block"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unblock(admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/c5597229-fa2a-48e8-b7c3-23b064b76b9e/unblock",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"c5597229-fa2a-48e8-b7c3-23b064b76b9e",
+								"unblock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "data",
+									"value": "{\n    \"name\": \"Tourist 1\",\n    \"bio\": \"I love islands\"\n}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/users/c5597229-fa2a-48e8-b7c3-23b064b76b9e",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"c5597229-fa2a-48e8-b7c3-23b064b76b9e"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Review",
+			"item": [
+				{
+					"name": "create-review",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"bookingId\": \"d4be86cf-b889-4f3b-8640-22045a87fbfd\",\r\n    \"rating\": 5,\r\n    \"comment\": \"It was a nice experience\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/reviews",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"reviews"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all revieww",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/reviews",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"reviews"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Wishlist",
+			"item": [
+				{
+					"name": "create wishlist",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"tourId\": \"394845c4-8a3c-4522-9dcb-8fb793a46566\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/wishlists",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wishlists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "my wishlists",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/wishlists/my",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wishlists",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete wishlist",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/wishlists/394845c4-8a3c-4522-9dcb-8fb793a46566",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wishlists",
+								"394845c4-8a3c-4522-9dcb-8fb793a46566"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Guides",
+			"item": [
+				{
+					"name": "Otp send",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/guides/verify/send-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"guides",
+								"verify",
+								"send-otp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Otp verify",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"otp\": \"744379\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/guides/verify/confirm",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"guides",
+								"verify",
+								"confirm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Otp verify Copy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/guides/verify/resend-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"guides",
+								"verify",
+								"resend-otp"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": ""
+		}
+	]
+}
