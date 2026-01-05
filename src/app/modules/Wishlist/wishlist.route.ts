@@ -18,6 +18,12 @@ router.get(
     WishlistController.getMyWishlist
 );
 
+router.get(
+    "/check/:tourId",
+    auth(),
+    WishlistController.checkWishlist
+);
+
 router.delete(
     "/:tourId",
     auth(UserRole.TOURIST),

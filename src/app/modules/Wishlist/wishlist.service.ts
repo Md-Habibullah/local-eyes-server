@@ -77,22 +77,19 @@ const removeFromWishlist = async (user: JwtPayload, tourId: string) => {
     return true;
 };
 
+
 const getMyWishlist = async (user: JwtPayload) => {
-    // 1 get tourist profile
     const tourist = await prisma.tourist.findUnique({
         where: { userId: user.userId },
         select: { id: true },
     });
 
+    // ✅ don't throw, return empty
     if (!tourist) {
-        throw new ApiError(
-            httpStatus.FORBIDDEN,
-            "Only tourists can view wishlist"
-        );
+        return [];
     }
 
-    // 2 fetch wishlist
-    const wishlist = await prisma.wishlist.findMany({
+    return prisma.wishlist.findMany({
         where: { touristId: tourist.id },
         include: {
             tour: {
@@ -108,16 +105,40 @@ const getMyWishlist = async (user: JwtPayload) => {
                 },
             },
         },
-        orderBy: {
-            createdAt: "desc",
+        orderBy: { createdAt: "desc" },
+    });
+};
+
+
+export const checkWishlist = async (
+    user: JwtPayload,
+    tourId: string
+) => {
+    // only tourist has wishlist
+    const tourist = await prisma.tourist.findUnique({
+        where: { userId: user.userId },
+        select: { id: true },
+    });
+
+    if (!tourist) {
+        return { exists: false };
+    }
+
+    const exists = await prisma.wishlist.findUnique({
+        where: {
+            touristId_tourId: {
+                touristId: tourist.id,
+                tourId,
+            },
         },
     });
 
-    return wishlist;
+    return { exists: Boolean(exists) };
 };
 
 export const WishlistServices = {
     addToWishlist,
     removeFromWishlist,
     getMyWishlist,
+    checkWishlist,
 };

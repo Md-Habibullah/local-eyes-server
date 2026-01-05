@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(
     '/',
     auth(UserRole.GUIDE),
-    fileUploader.upload.single('file'),
+    fileUploader.upload.array('files', 3), // ← allow up to 3 files
     (req: Request, res: Response, next: NextFunction) => {
         req.body = TourValidation.createTour.parse(
             JSON.parse(req.body.data)
@@ -42,7 +42,7 @@ router.get(
 router.patch(
     '/:id',
     auth(UserRole.GUIDE),
-    fileUploader.upload.single('file'),
+    fileUploader.upload.array('files', 3), // ← allow up to 3 files
     (req: Request, res: Response, next: NextFunction) => {
         req.body = TourValidation.updateTour.parse(
             JSON.parse(req.body.data)

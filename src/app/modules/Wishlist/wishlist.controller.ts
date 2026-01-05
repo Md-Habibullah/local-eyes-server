@@ -53,8 +53,23 @@ const getMyWishlist = catchAsync(
     }
 );
 
+export const checkWishlist = catchAsync(
+    async (req: Request, res: Response) => {
+        const user = req.user as JwtPayload; // from auth middleware
+        const { tourId } = req.params;
+
+        const result = await WishlistServices.checkWishlist(user, tourId);
+
+        res.status(200).json({
+            success: true,
+            ...result,
+        });
+    }
+);
+
 export const WishlistController = {
     addToWishlist,
     removeFromWishlist,
     getMyWishlist,
+    checkWishlist
 };

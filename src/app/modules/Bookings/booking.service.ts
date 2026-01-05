@@ -177,6 +177,37 @@ const getAllBookings = async (
     };
 };
 
+export const getBookingByIdService = async (bookingId: string) => {
+    const booking = await prisma.booking.findUnique({
+        where: {
+            id: bookingId,
+        },
+        include: {
+            tour: true,
+            tourist: {
+                select: {
+                    id: true,
+                    name: true,
+                    profilePhoto: true,
+                },
+            },
+            guide: {
+                select: {
+                    id: true,
+                    name: true,
+                    profilePhoto: true,
+                },
+            },
+        },
+    });
+
+    if (!booking) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Booking not found");
+    }
+
+    return booking;
+};
+
 // ===============================
 // UPDATE BOOKING STATUS (GUIDE)
 // ===============================
@@ -261,6 +292,7 @@ const cancelBookingByTourist = async (req: Request) => {
 export const BookingServices = {
     createBooking,
     getAllBookings,
+    getBookingByIdService,
     updateBookingStatus,
     cancelBookingByTourist
 };

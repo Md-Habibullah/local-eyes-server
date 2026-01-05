@@ -67,4 +67,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     })
 })
 
+app.set("trust proxy", 1);
+
 export default app;

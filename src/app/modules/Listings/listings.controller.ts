@@ -11,7 +11,7 @@ import { JwtPayload } from '../../interfaces/jwt.interface';
 const createTour = catchAsync(
     async (req: Request, res: Response) => {
         const result = await TourServices.createTour(req);
-
+        console.log('response from controller')
         sendResponse(res, {
             statusCode: httpStatus.CREATED,
             success: true,

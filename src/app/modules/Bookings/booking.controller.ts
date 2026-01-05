@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import pick from '../../../shared/pick';
 import { bookingFilterableFields } from './booking.constant';
-import { BookingServices } from './booking.service';
+import { BookingServices, getBookingByIdService } from './booking.service';
 import { paginationFields } from '../../constrains';
 import { JwtPayload } from '../../interfaces/jwt.interface';
 
@@ -42,6 +42,27 @@ const getAllBookings = catchAsync(
     }
 );
 
+
+export const getBookingById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { bookingId } = req.params;
+
+        const result = await getBookingByIdService(bookingId);
+
+        res.status(httpStatus.OK).json({
+            success: true,
+            message: "Booking retrieved successfully",
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 const updateBookingStatus = catchAsync(
     async (req: Request, res: Response) => {
         const result = await BookingServices.updateBookingStatus(req);
@@ -71,6 +92,7 @@ const cancelBookingByTourist = catchAsync(
 export const BookingController = {
     createBooking,
     getAllBookings,
+    getBookingById,
     updateBookingStatus,
     cancelBookingByTourist
 };

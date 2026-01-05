@@ -19,15 +19,6 @@ import { JwtPayload } from '../../interfaces/jwt.interface';
 // CREATE TOUR
 // ===============================
 const createTour = async (req: Request) => {
-    // const guide = await prisma.guide.findFirstOrThrow({
-    //     where: {
-    //         user: {
-    //             email: req.user?.email,
-    //             role: UserRole.GUIDE,
-    //             status: UserStatus.ACTIVE,
-    //         },
-    //     },
-    // });
     const guide = await prisma.guide.findFirstOrThrow({
         where: { userId: req.user!.userId },
     });
@@ -39,11 +30,17 @@ const createTour = async (req: Request) => {
         );
     }
 
-    const file = req.file;
+    // Handle multiple files
+    const files = req.files as Express.Multer.File[] | undefined;
 
-    if (file) {
-        const uploadedImage = await fileUploader.uploadToCloudinary(file);
-        req.body.images = [uploadedImage.secure_url];
+    if (files && files.length > 0) {
+        const uploadedImages = await Promise.all(
+            files.map((file) => fileUploader.uploadToCloudinary(file))
+        );
+
+        req.body.images = uploadedImages.map(
+            (img) => img.secure_url
+        );
     }
 
     const tour = await prisma.tour.create({
@@ -66,14 +63,6 @@ const updateTour = async (req: Request) => {
         where: { id },
     });
 
-    // const guide = await prisma.guide.findFirstOrThrow({
-    //     where: {
-    //         user: {
-    //             email: req.user?.email,
-    //             role: UserRole.GUIDE,
-    //         },
-    //     },
-    // });
     const guide = await prisma.guide.findFirstOrThrow({
         where: { userId: req.user!.userId },
     });
@@ -92,11 +81,18 @@ const updateTour = async (req: Request) => {
         );
     }
 
-    const file = req.file;
+    const files = req.files as Express.Multer.File[] | undefined;
 
-    if (file) {
-        const uploadedImage = await fileUploader.uploadToCloudinary(file);
-        req.body.images = [uploadedImage.secure_url];
+    if (files && files.length > 0) {
+        const uploadedImages = await Promise.all(
+            files.map((file) => fileUploader.uploadToCloudinary(file))
+        );
+
+        // Append new images or replace existing images
+        // Here I assume we **replace existing images**; adjust if you want to append
+        req.body.images = uploadedImages.map(
+            (img) => img.secure_url
+        );
     }
 
     const updatedTour = await prisma.tour.update({

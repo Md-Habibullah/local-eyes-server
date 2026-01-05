@@ -20,6 +20,11 @@ router.get(
     BookingController.getAllBookings
 );
 
+router.get(
+    "/:bookingId",
+    BookingController.getBookingById
+);
+
 router.patch(
     '/:id',
     auth(UserRole.GUIDE),
