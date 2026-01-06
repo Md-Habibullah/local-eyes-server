@@ -26,7 +26,7 @@ router.get(
 );
 
 router.patch(
-    '/:id',
+    '/:id/status',
     auth(UserRole.GUIDE),
     validateRequest(BookingValidation.updateBookingStatus),
     BookingController.updateBookingStatus

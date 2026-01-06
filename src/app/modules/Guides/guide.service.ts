@@ -4,6 +4,8 @@ import { generateOTP, OTP_EXPIRY_MINUTES, OTP_RESEND_LIMIT, OTP_RESEND_WINDOW_MS
 import ApiError from "../../errors/apiError";
 import httpStatus from "http-status";
 import { sendOtpMail } from "../../../helpers/sendOtpMail";
+import { Request } from "express";
+import { JwtPayload } from "../../interfaces/jwt.interface";
 
 /* ---------------- SEND OTP ---------------- */
 const sendVerificationOtp = async (userId: string) => {
@@ -124,8 +126,82 @@ const resendVerificationOtp = async (userId: string) => {
     return true;
 };
 
+const getGuideEarnings = async (req: Request) => {
+    const guide = await prisma.guide.findFirstOrThrow({
+        where: { userId: req.user!.userId },
+    });
+
+    const result = await prisma.booking.aggregate({
+        where: {
+            guideId: guide.id,
+            status: "COMPLETED",
+            paymentStatus: "COMPLETED",
+            isGuidePaid: false,
+        },
+        _sum: {
+            guidePayoutAmount: true,
+        },
+        _count: {
+            id: true,
+        },
+    });
+
+    return {
+        totalUnpaidEarning: result._sum.guidePayoutAmount || 0,
+        totalCompletedBookings: result._count.id,
+    };
+}
+
+export const getAllGuidesUnpaidEarnings = async () => {
+    // Step 1: Fetch all verified guides
+    const guides = await prisma.guide.findMany({
+        where: { isVerified: true },
+        select: {
+            id: true,
+            name: true,
+            profilePhoto: true,
+            dailyRate: true,
+            userId: true,
+        },
+    });
+
+    // Step 2: Aggregate unpaid earnings for each guide
+    const earnings = await prisma.booking.groupBy({
+        by: ["guideId"],
+        where: {
+            guideId: { in: guides.map(g => g.id) },
+            status: "COMPLETED",
+            paymentStatus: "COMPLETED",
+            isGuidePaid: false,
+        },
+        _sum: { guidePayoutAmount: true },
+        _count: { id: true },
+    });
+
+    // Step 3: Merge guide info with earnings, filter out guides with 0 earning
+    const result = earnings
+        .map(e => {
+            const guide = guides.find(g => g.id === e.guideId);
+            if (!guide) return null; // just in case
+
+            return {
+                guideId: guide.id,
+                name: guide.name,
+                profilePhoto: guide.profilePhoto,
+                dailyRate: guide.dailyRate,
+                totalUnpaidEarning: e._sum.guidePayoutAmount || 0,
+                totalCompletedBookings: e._count.id,
+            };
+        })
+        .filter(g => g && g.totalUnpaidEarning > 0); // remove guides with 0 unpaid earnings
+
+    return result;
+};
+
 export const GuideServices = {
     sendVerificationOtp,
     verifyGuideOtp,
     resendVerificationOtp,
+    getGuideEarnings,
+    getAllGuidesUnpaidEarnings
 };

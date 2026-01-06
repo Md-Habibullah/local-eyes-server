@@ -24,4 +24,16 @@ router.post(
     GuideController.resendOtp
 );
 
+router.get(
+    "/unpaid-earnings",
+    auth(UserRole.GUIDE),
+    GuideController.getGuideUnpaidEarnings
+);
+
+router.get(
+    "/earnings",
+    auth(UserRole.ADMIN),
+    GuideController.getAllGuidesUnpaidEarnings
+);
+
 export const GuideRoutes = router;

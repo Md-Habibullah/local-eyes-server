@@ -87,10 +87,115 @@ const getAllUsers = async (
 
 // get my profile (me)
 
+// old
+// const getMyProfile = async (user: JwtPayload) => {
+//     const userInfo = await prisma.user.findFirstOrThrow({
+//         where: {
+//             email: user?.email,
+//             status: UserStatus.ACTIVE,
+//         },
+//         select: {
+//             id: true,
+//             email: true,
+//             needPasswordChange: true,
+//             role: true,
+//             status: true,
+//         },
+//     });
+
+//     let profileInfo;
+
+//     if (userInfo.role === UserRole.ADMIN) {
+//         profileInfo = await prisma.admin.findUnique({
+//             where: {
+//                 userId: userInfo.id,
+//             },
+//             select: {
+//                 id: true,
+//                 name: true,
+//                 profilePhoto: true,
+//                 address: true,
+//                 contactNumber: true,
+//                 isSuper: true,
+//                 createdAt: true,
+//                 updatedAt: true,
+//             },
+//         });
+//     } else if (userInfo.role === UserRole.GUIDE) {
+//         profileInfo = await prisma.guide.findUnique({
+//             where: {
+//                 userId: userInfo.id,
+//             },
+//             select: {
+//                 id: true,
+//                 name: true,
+//                 gender: true,
+//                 profilePhoto: true,
+//                 bio: true,
+//                 address: true,
+//                 contactNumber: true,
+//                 languages: true,
+//                 expertise: true,
+//                 dailyRate: true,
+//                 isVerified: true,
+
+//                 createdAt: true,
+//                 updatedAt: true,
+
+//                 reviews: {
+//                     select: {
+//                         rating: true,
+//                         comment: true,
+//                         createdAt: true,
+//                         tourist: {
+//                             select: {
+//                                 name: true,
+//                             },
+//                         },
+//                     },
+//                 },
+//             },
+//         });
+//     } else if (userInfo.role === UserRole.TOURIST) {
+//         profileInfo = await prisma.tourist.findUnique({
+//             where: {
+//                 userId: userInfo.id,
+//             },
+//             select: {
+//                 id: true,
+//                 name: true,
+//                 gender: true,
+//                 profilePhoto: true,
+//                 bio: true,
+//                 address: true,
+//                 contactNumber: true,
+//                 languages: true,
+//                 preferences: true,
+//                 createdAt: true,
+//                 updatedAt: true,
+//             },
+//         });
+//     }
+
+//     const avgRating = await prisma.review.aggregate({
+//         where: { guideId: profileInfo?.id },
+//         _avg: { rating: true },
+//         _count: { rating: true },
+//     });
+
+//     return {
+//         ...userInfo,
+//         ...profileInfo,
+//         averageRating: avgRating._avg.rating ?? 0,
+//         totalReviews: avgRating._count.rating,
+//     };
+// };
+
+// updated
 const getMyProfile = async (user: JwtPayload) => {
     const userInfo = await prisma.user.findFirstOrThrow({
         where: {
-            email: user?.email,
+            email: user.email,
             status: UserStatus.ACTIVE,
         },
         select: {
@@ -102,13 +207,16 @@ const getMyProfile = async (user: JwtPayload) => {
         },
     });
 
-    let profileInfo;
+    let profileInfo: any = null;
+    let ratingInfo = {
+        averageRating: 0,
+        totalReviews: 0,
+    };
 
+    // ================= ADMIN =================
     if (userInfo.role === UserRole.ADMIN) {
         profileInfo = await prisma.admin.findUnique({
-            where: {
-                userId: userInfo.id,
-            },
+            where: { userId: userInfo.id },
             select: {
                 id: true,
                 name: true,
@@ -120,11 +228,12 @@ const getMyProfile = async (user: JwtPayload) => {
                 updatedAt: true,
             },
         });
-    } else if (userInfo.role === UserRole.GUIDE) {
+    }
+
+    // ================= GUIDE =================
+    if (userInfo.role === UserRole.GUIDE) {
         profileInfo = await prisma.guide.findUnique({
-            where: {
-                userId: userInfo.id,
-            },
+            where: { userId: userInfo.id },
             select: {
                 id: true,
                 name: true,
@@ -137,29 +246,37 @@ const getMyProfile = async (user: JwtPayload) => {
                 expertise: true,
                 dailyRate: true,
                 isVerified: true,
-
                 createdAt: true,
                 updatedAt: true,
-
                 reviews: {
                     select: {
                         rating: true,
                         comment: true,
                         createdAt: true,
                         tourist: {
-                            select: {
-                                name: true,
-                            },
+                            select: { name: true },
                         },
                     },
                 },
             },
         });
-    } else if (userInfo.role === UserRole.TOURIST) {
+
+        const avgRating = await prisma.review.aggregate({
+            where: { guideId: profileInfo.id },
+            _avg: { rating: true },
+            _count: { rating: true },
+        });
+
+        ratingInfo = {
+            averageRating: avgRating._avg.rating ?? 0,
+            totalReviews: avgRating._count.rating,
+        };
+    }
+
+    // ================= TOURIST =================
+    if (userInfo.role === UserRole.TOURIST) {
         profileInfo = await prisma.tourist.findUnique({
-            where: {
-                userId: userInfo.id,
-            },
+            where: { userId: userInfo.id },
             select: {
                 id: true,
                 name: true,
@@ -176,19 +293,13 @@ const getMyProfile = async (user: JwtPayload) => {
         });
     }
 
-    const avgRating = await prisma.review.aggregate({
-        where: { guideId: profileInfo?.id },
-        _avg: { rating: true },
-        _count: { rating: true },
-    });
-
     return {
         ...userInfo,
-        ...profileInfo,
-        averageRating: avgRating._avg.rating ?? 0,
-        totalReviews: avgRating._count.rating,
+        profile: profileInfo,
+        ...ratingInfo,
     };
 };
+
 
 // get user by id (admin)
 const getUserById = async (id: string) => {

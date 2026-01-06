@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { TourCategory } from '../../../generated/prisma/enums';
 
-const createTour = z.object({
-    title: z.string(),
-    description: z.string(),
-    itinerary: z.string(),
+export const createTour = z.object({
+    title: z.string().min(3),
+    description: z.string().min(10),
+    itinerary: z.string().min(10),
     price: z.number().int().positive(),
     duration: z.number().int().positive(),
     durationType: z.string().optional(),
@@ -13,7 +13,7 @@ const createTour = z.object({
     category: z.nativeEnum(TourCategory),
     city: z.string(),
     country: z.string().optional(),
-    images: z.array(z.string()).optional(),
+    images: z.array(z.string()).optional(), // matches Prisma model
 });
 
 const updateTour = z.object({

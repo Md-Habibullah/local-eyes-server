@@ -45,9 +45,31 @@ const resendOtp = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getGuideUnpaidEarnings = catchAsync(async (req: Request, res: Response) => {
+    const result = await GuideServices.getGuideEarnings(req);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Unpaid earnings retrieved successfully',
+        data: result
+    });
+});
+
+const getAllGuidesUnpaidEarnings = catchAsync(async (req: Request, res: Response) => {
+    const result = await GuideServices.getAllGuidesUnpaidEarnings();
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'All guides unpaid earnings retrieved successfully',
+        data: result
+    });
+});
 
 export const GuideController = {
     sendOtp,
     verifyOtp,
-    resendOtp
+    resendOtp,
+    getGuideUnpaidEarnings,
+    getAllGuidesUnpaidEarnings
 };
