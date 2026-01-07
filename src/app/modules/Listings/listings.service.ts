@@ -180,6 +180,14 @@ const getAllTours = async (
                     profilePhoto: true,
                 },
             },
+            reviews: {
+                select: {
+                    id: true,
+                    rating: true,
+                    comment: true,
+                    createdAt: true,
+                },
+            },
         },
     });
 

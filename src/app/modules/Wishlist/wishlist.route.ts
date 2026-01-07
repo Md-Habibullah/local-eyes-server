@@ -6,11 +6,12 @@ import { WishlistController } from "./wishlist.controller";
 
 const router = express.Router();
 
-router.post(
-    "/",
-    auth(UserRole.TOURIST),
-    WishlistController.addToWishlist
-);
+// router.post(
+//     "/",
+//     auth(UserRole.TOURIST),
+//     WishlistController.addToWishlist
+// );
+
 
 router.get(
     "/my",
@@ -24,10 +25,16 @@ router.get(
     WishlistController.checkWishlist
 );
 
-router.delete(
-    "/:tourId",
+router.post(
+    "/toggle",
     auth(UserRole.TOURIST),
-    WishlistController.removeFromWishlist
+    WishlistController.toggleWishlist
 );
+
+// router.delete(
+//     "/:tourId",
+//     auth(UserRole.TOURIST),
+//     WishlistController.removeFromWishlist
+// );
 
 export const WishlistRoutes = router;
