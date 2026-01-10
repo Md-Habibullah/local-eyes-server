@@ -113,9 +113,12 @@ const loginUser = async (payload: {
     email: string,
     password: string
 }) => {
+    const email = payload.email.trim();
+    const password = payload.password.trim();
+
     const userData = await prisma.user.findFirst({
         where: {
-            email: payload.email,
+            email,
             status: UserStatus.ACTIVE
         }
     });
@@ -124,7 +127,7 @@ const loginUser = async (payload: {
         throw new ApiError(httpStatus.UNAUTHORIZED, "User does not exists!");
     }
 
-    const isCorrectPassword: boolean = await bcrypt.compare(payload.password, userData.password);
+    const isCorrectPassword: boolean = await bcrypt.compare(password, userData.password);
 
     if (!isCorrectPassword) {
         throw new ApiError(httpStatus.UNAUTHORIZED, "Password incorrect!");

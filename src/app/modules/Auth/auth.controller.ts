@@ -81,12 +81,14 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
         httpOnly: true,
         sameSite: "none",
         maxAge: accessTokenMaxAge,
+        partitioned: true,
     });
     res.cookie("refreshToken", refreshToken, {
         secure: config.env === 'production',
         httpOnly: true,
         sameSite: "none",
         maxAge: refreshTokenMaxAge,
+        partitioned: true,
     });
 
     sendResponse(res, {
@@ -166,6 +168,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
         httpOnly: true,
         sameSite: "none",
         maxAge: accessTokenMaxAge,
+        partitioned: true,
     });
 
     res.cookie("refreshToken", result.refreshToken, {
@@ -173,6 +176,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
         httpOnly: true,
         sameSite: "none",
         maxAge: refreshTokenMaxAge,
+        partitioned: true,
     });
 
     sendResponse(res, {
@@ -277,12 +281,14 @@ export const googleCallbackController = catchAsync(
             httpOnly: true,
             secure: config.env === "production",
             sameSite: "none",
+            partitioned: true,
         })
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: config.env === "production",
             sameSite: "none",
+            partitioned: true,
         })
 
 

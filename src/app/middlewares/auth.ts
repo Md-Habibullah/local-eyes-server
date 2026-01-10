@@ -19,7 +19,7 @@ const auth = (...roles: UserRole[]) => {
             } else if (req.cookies?.accessToken) {
                 token = req.cookies.accessToken;
             }
-
+            console.log("cookies:", req.cookies);
             if (!token) {
                 throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!");
             }

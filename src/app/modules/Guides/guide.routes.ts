@@ -6,6 +6,30 @@ import { GuideController } from './guide.controller';
 
 const router = express.Router();
 
+router.get(
+    '/',
+    GuideController.getAllGuides
+);
+
+router.get(
+    "/unpaid-earnings",
+    auth(UserRole.GUIDE),
+    GuideController.getGuideUnpaidEarnings
+);
+
+router.get(
+    "/earnings",
+    auth(UserRole.ADMIN),
+    GuideController.getAllGuidesUnpaidEarnings
+);
+
+router.get(
+    '/:id',
+    auth(UserRole.GUIDE, UserRole.TOURIST, UserRole.ADMIN),
+    GuideController.getGuideById
+);
+
+
 router.post(
     '/verify/send-otp',
     auth(UserRole.GUIDE),
@@ -24,16 +48,5 @@ router.post(
     GuideController.resendOtp
 );
 
-router.get(
-    "/unpaid-earnings",
-    auth(UserRole.GUIDE),
-    GuideController.getGuideUnpaidEarnings
-);
-
-router.get(
-    "/earnings",
-    auth(UserRole.ADMIN),
-    GuideController.getAllGuidesUnpaidEarnings
-);
 
 export const GuideRoutes = router;

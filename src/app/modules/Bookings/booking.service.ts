@@ -284,7 +284,7 @@ const cancelBookingByTourist = async (req: Request) => {
     // safe to update now
     return prisma.booking.update({
         where: { id },
-        data: { status: req.body.status },
+        data: { status: BookingStatus.CANCELLED },
     });
 };
 

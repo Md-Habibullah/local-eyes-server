@@ -22,21 +22,21 @@ import { JwtPayload } from "../../interfaces/jwt.interface";
 //     }
 // );
 
-// const removeFromWishlist = catchAsync(
-//     async (req: Request, res: Response) => {
-//         const user = req.user as JwtPayload;
-//         const { tourId } = req.params;
+const removeFromWishlist = catchAsync(
+    async (req: Request, res: Response) => {
+        const user = req.user as JwtPayload;
+        const { tourId } = req.params;
 
-//         await WishlistServices.removeFromWishlist(user, tourId);
+        await WishlistServices.removeFromWishlist(user, tourId);
 
-//         sendResponse(res, {
-//             statusCode: httpStatus.OK,
-//             success: true,
-//             message: "Tour removed from wishlist",
-//             data: null,
-//         });
-//     }
-// );
+        sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "Tour removed from wishlist",
+            data: null,
+        });
+    }
+);
 
 const toggleWishlist = catchAsync(async (req, res) => {
     const user = req.user as JwtPayload;
@@ -86,7 +86,7 @@ export const checkWishlist = catchAsync(
 
 export const WishlistController = {
     // addToWishlist,
-    // removeFromWishlist,
+    removeFromWishlist,
     toggleWishlist,
     getMyWishlist,
     checkWishlist

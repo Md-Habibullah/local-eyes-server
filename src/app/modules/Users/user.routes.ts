@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.get(
     '/',
-    auth(UserRole.ADMIN),
+    auth(UserRole.ADMIN, UserRole.GUIDE, UserRole.TOURIST),
     UserController.getAllUsers
 );
 
@@ -18,7 +18,6 @@ router.get(
     auth(UserRole.ADMIN, UserRole.GUIDE, UserRole.TOURIST),
     UserController.getMyProfile
 )
-
 
 router.patch(
     "/:id",

@@ -5,6 +5,28 @@ import sendResponse from '../../../shared/sendResponse';
 import httpStatus from 'http-status';
 import { GuideServices } from './guide.service';
 
+const getAllGuides = catchAsync(async (req: Request, res: Response) => {
+    const result = await GuideServices.getAllGuides();
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Guides retrieve successfully',
+        data: result,
+    });
+});
+const getGuideById = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await GuideServices.getGuideById(id);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Guide retrieve successfully',
+        data: result,
+    });
+});
+
 const sendOtp = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user!.userId;
     await GuideServices.sendVerificationOtp(userId);
@@ -67,6 +89,8 @@ const getAllGuidesUnpaidEarnings = catchAsync(async (req: Request, res: Response
 });
 
 export const GuideController = {
+    getAllGuides,
+    getGuideById,
     sendOtp,
     verifyOtp,
     resendOtp,

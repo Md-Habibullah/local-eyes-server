@@ -7,6 +7,40 @@ import { sendOtpMail } from "../../../helpers/sendOtpMail";
 import { Request } from "express";
 import { JwtPayload } from "../../interfaces/jwt.interface";
 
+
+const getAllGuides = async () => {
+    const guide = await prisma.guide.findMany({
+        include: {
+            user: {
+                select: {
+                    email: true,
+                    status: true
+                }
+            }
+        }
+    });
+
+    if (!guide) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Guide not found")
+    }
+
+    return guide;
+}
+
+const getGuideById = async (id: string) => {
+    const guide = await prisma.guide.findUnique({
+        where: {
+            id
+        },
+    });
+
+    if (!guide) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Guide not found")
+    }
+
+    return guide;
+}
+
 /* ---------------- SEND OTP ---------------- */
 const sendVerificationOtp = async (userId: string) => {
     const guide = await prisma.guide.findFirstOrThrow({
@@ -199,6 +233,8 @@ export const getAllGuidesUnpaidEarnings = async () => {
 };
 
 export const GuideServices = {
+    getAllGuides,
+    getGuideById,
     sendVerificationOtp,
     verifyGuideOtp,
     resendVerificationOtp,

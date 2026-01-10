@@ -31,10 +31,10 @@ router.post(
     WishlistController.toggleWishlist
 );
 
-// router.delete(
-//     "/:tourId",
-//     auth(UserRole.TOURIST),
-//     WishlistController.removeFromWishlist
-// );
+router.delete(
+    "/:tourId",
+    auth(UserRole.TOURIST),
+    WishlistController.removeFromWishlist
+);
 
 export const WishlistRoutes = router;

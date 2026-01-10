@@ -41,7 +41,7 @@ router.get(
 // UPDATE TOUR
 router.patch(
     '/:id',
-    auth(UserRole.GUIDE),
+    auth(UserRole.GUIDE, UserRole.ADMIN),
     fileUploader.upload.array('files', 3), // ← allow up to 3 files
     (req: Request, res: Response, next: NextFunction) => {
         req.body = TourValidation.updateTour.parse(

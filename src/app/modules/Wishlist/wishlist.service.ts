@@ -45,37 +45,37 @@ import { JwtPayload } from "../../interfaces/jwt.interface";
 //     return wishlist;
 // };
 
-// const removeFromWishlist = async (user: JwtPayload, tourId: string) => {
-//     // 1 get tourist profile
-//     const tourist = await prisma.tourist.findUnique({
-//         where: { userId: user.userId },
-//         select: { id: true },
-//     });
+const removeFromWishlist = async (user: JwtPayload, tourId: string) => {
+    // 1 get tourist profile
+    const tourist = await prisma.tourist.findUnique({
+        where: { userId: user.userId },
+        select: { id: true },
+    });
 
-//     if (!tourist) {
-//         throw new ApiError(
-//             httpStatus.FORBIDDEN,
-//             "Only tourists can remove from wishlist"
-//         );
-//     }
+    if (!tourist) {
+        throw new ApiError(
+            httpStatus.FORBIDDEN,
+            "Only tourists can remove from wishlist"
+        );
+    }
 
-//     // 2 delete wishlist item
-//     const result = await prisma.wishlist.deleteMany({
-//         where: {
-//             touristId: tourist.id,
-//             tourId,
-//         },
-//     });
+    // 2 delete wishlist item
+    const result = await prisma.wishlist.deleteMany({
+        where: {
+            touristId: tourist.id,
+            tourId,
+        },
+    });
 
-//     if (result.count === 0) {
-//         throw new ApiError(
-//             httpStatus.NOT_FOUND,
-//             "Wishlist item not found"
-//         );
-//     }
+    if (result.count === 0) {
+        throw new ApiError(
+            httpStatus.NOT_FOUND,
+            "Wishlist item not found"
+        );
+    }
 
-//     return true;
-// };
+    return true;
+};
 
 const toggleWishlist = async (user: JwtPayload, tourId: string) => {
     // 1️⃣ get tourist profile
@@ -192,7 +192,7 @@ const checkWishlist = async (
 
 export const WishlistServices = {
     // addToWishlist,
-    // removeFromWishlist,
+    removeFromWishlist,
     toggleWishlist,
     getMyWishlist,
     checkWishlist,

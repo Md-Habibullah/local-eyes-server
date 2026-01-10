@@ -288,6 +288,7 @@ const getMyTours = async (req: Request) => {
     // 🔐 force guide ownership ONLY
     andConditions.push({
         guideId: guide.id,
+        isActive: true
     });
 
     // 🔍 search
@@ -360,37 +361,50 @@ const getMyTours = async (req: Request) => {
 const deleteTour = async (req: Request) => {
     const { id } = req.params;
 
+    const user = req.user!;
+
     const tour = await prisma.tour.findUniqueOrThrow({
         where: { id },
     });
 
-    // const guide = await prisma.guide.findFirstOrThrow({
-    //     where: {
-    //         user: {
-    //             email: req.user?.email,
-    //         },
-    //     },
-    // });
-    const guide = await prisma.guide.findFirstOrThrow({
-        where: { userId: req.user!.userId },
-    });
-
-    if (tour.guideId !== guide.id) {
-        throw new ApiError(
-            httpStatus.FORBIDDEN,
-            'You are not allowed to delete this tour'
-        );
+    // Admin can delete any tour
+    if (user.role === 'ADMIN') {
+        return await prisma.tour.update({
+            where: { id },
+            data: {
+                isActive: false,
+            },
+        });
     }
 
-    const deletedTour = await prisma.tour.update({
-        where: { id },
-        data: {
-            isActive: false,
-        },
-    });
+    // Guide can delete only own tour
+    if (user.role === 'GUIDE') {
+        const guide = await prisma.guide.findFirstOrThrow({
+            where: { userId: user.userId },
+        });
 
-    return deletedTour;
+        if (tour.guideId !== guide.id) {
+            throw new ApiError(
+                httpStatus.FORBIDDEN,
+                'You are not allowed to delete this tour'
+            );
+        }
+
+        return await prisma.tour.update({
+            where: { id },
+            data: {
+                isActive: false,
+            },
+        });
+    }
+
+    //  Others cannot delete
+    throw new ApiError(
+        httpStatus.FORBIDDEN,
+        'You are not allowed to delete this tour'
+    );
 };
+
 
 export const TourServices = {
     createTour,

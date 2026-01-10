@@ -28,7 +28,7 @@ app.use(cookieParser());
 // );
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: ['http://localhost:3000', 'https://localeyesdb.vercel.app'],
     credentials: true
 }));
 
@@ -53,7 +53,6 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/api/v1', router);
-
 app.use(globalErrorHandler);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
