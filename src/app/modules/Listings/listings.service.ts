@@ -280,7 +280,7 @@ const getMyTours = async (req: Request) => {
         maxPrice,
         isActive,
         page = 1,
-        limit = 10,
+        limit = 100,
     } = query;
 
     const andConditions: any[] = [];

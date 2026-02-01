@@ -60,29 +60,34 @@
 //     upload,
 //     uploadToCloudinary
 // }
-
 import multer from "multer";
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import config from "../config";
 
-// Cloudinary config
+// ---------------- Cloudinary Config ----------------
 cloudinary.config({
     cloud_name: config.cloudinary.cloud_name,
     api_key: config.cloudinary.api_key,
     api_secret: config.cloudinary.api_secret,
 });
 
-// Multer memory storage
+// ---------------- Multer Setup ----------------
+// Use memory storage with high file size limit (adjust as needed)
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: 50 * 1024 * 1024, // 50 MB per file
+    },
+});
 
-// Upload buffer to Cloudinary
+// ---------------- Cloudinary Upload ----------------
 const uploadToCloudinary = async (file: Express.Multer.File): Promise<UploadApiResponse> => {
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
             {
                 public_id: `${file.originalname}-${Date.now()}`,
-                resource_type: "image",
+                resource_type: "auto", // 'auto' allows images, videos, PDFs
             },
             (error, result) => {
                 if (error) return reject(error);
@@ -90,10 +95,12 @@ const uploadToCloudinary = async (file: Express.Multer.File): Promise<UploadApiR
             }
         );
 
+        // Send buffer to Cloudinary
         uploadStream.end(file.buffer);
     });
 };
 
+// ---------------- Export ----------------
 export const fileUploader = {
     upload,
     uploadToCloudinary,
