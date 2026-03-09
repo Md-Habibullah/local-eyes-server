@@ -45,6 +45,10 @@ const moduleRoutes = [
     {
         path: '/wishlists',
         route: WishlistRoutes
+    },
+    {
+        path: '/ai',
+        route: WishlistRoutes
     }
     // {
     //     path: '/meta',

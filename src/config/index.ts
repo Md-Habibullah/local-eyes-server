@@ -51,4 +51,5 @@ export default {
         fail_url: process.env.SSLC_FAIL_URL,
         cancel_url: process.env.SSLC_CANCEL_URL,
     },
+    openai_api_key: process.env.OPENAI_API_KEY,
 };
